@@ -82,7 +82,14 @@ public partial class MatchZy
             if (!playerData[key].IsValid) continue;
             if (playerData[key].TeamNum == team) {
                 playerCount++;
-                if (playerReadyStatus[key] == true) readyCount++;
+                if (IsPlayerAutoReady(playerData[key]))
+                {
+                    readyCount++;
+                }
+                else if (playerReadyStatus.TryGetValue(key, out bool ready) && ready)
+                {
+                    readyCount++;
+                }
             }
         }
         return (playerCount, readyCount);

@@ -127,9 +127,7 @@ namespace MatchZy
             Log($"[!stay command] {player.UserId}, TeamNum: {player.TeamNum}, knifeWinner: {knifeWinner}, isSideSelectionPhase: {isSideSelectionPhase}");
             if (player.TeamNum == knifeWinner)
             {
-                PrintToAllChat(Localizer["matchzy.knife.decidedtostay", knifeWinnerName]);
-                // Server.PrintToChatAll($"{chatPrefix} {ChatColors.Green}{knifeWinnerName}{ChatColors.Default} has decided to stay!");
-                StartLive();
+                HandleKnifeStayDecision();
             }
         }
 
@@ -143,11 +141,7 @@ namespace MatchZy
 
             if (player.TeamNum == knifeWinner)
             {
-                Server.ExecuteCommand("mp_swapteams;");
-                SwapSidesInTeamData(true);
-                PrintToAllChat(Localizer["matchzy.knife.decidedtoswitch", knifeWinnerName]);
-                // Server.PrintToChatAll($"{chatPrefix} {ChatColors.Green}{knifeWinnerName}{ChatColors.Default} has decided to switch!");
-                StartLive();
+                HandleKnifeSwitchDecision();
             }
         }
 
@@ -525,12 +519,10 @@ namespace MatchZy
             string currentMapName = Server.MapName;
             if (long.TryParse(currentMapName, out _))
             { // Check if mapName is a long for workshop map ids
-                Server.ExecuteCommand($"bot_kick");
                 Server.ExecuteCommand($"host_workshop_map \"{currentMapName}\"");
             }
             else if (Server.IsMapValid(currentMapName))
             {
-                Server.ExecuteCommand($"bot_kick");
                 Server.ExecuteCommand($"changelevel \"{currentMapName}\"");
             }
             else

@@ -540,6 +540,13 @@ namespace MatchZy
             var steamId = player.SteamID;
             try
             {
+                if (IsAutomatedMatchPlayer(player))
+                {
+                    if (player.Team == CsTeam.CounterTerrorist || player.Team == CsTeam.Terrorist || player.Team == CsTeam.Spectator)
+                    {
+                        return player.Team;
+                    }
+                }
                 if (matchzyTeam1.teamPlayers != null && matchzyTeam1.teamPlayers[steamId.ToString()] != null)
                 {
                     if (teamSides[matchzyTeam1] == "CT")

@@ -126,9 +126,10 @@ namespace MatchZy
                 (int team1, int team2) = GetTeamsScore();
 
                 bool ready = true;
-                foreach (var key in playerReadyStatus.Keys)
+                foreach (var key in playerData.Keys)
                 {
-                    if (!playerReadyStatus[key])
+                    if (IsPlayerAutoReady(playerData[key])) continue;
+                    if (!playerReadyStatus.TryGetValue(key, out bool playerReady) || !playerReady)
                     {
                         ready = false;
                         break;

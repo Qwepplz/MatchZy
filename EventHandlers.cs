@@ -14,9 +14,10 @@ public partial class MatchZy
 
             if (!IsPlayerValid(player)) return HookResult.Continue;
             Log($"[FULL CONNECT] Player ID: {player!.UserId}, Name: {player.PlayerName} has connected!");
+            if (!ShouldTrackPlayer(player)) return HookResult.Continue;
 
             // Handling whitelisted players
-            if (!player.IsBot || !player.IsHLTV)
+            if (!player.IsBot && !player.IsHLTV)
             {
                 var steamId = player.SteamID;
 
@@ -40,7 +41,11 @@ public partial class MatchZy
             {
                 playerData[player.UserId.Value] = player;
                 connectedPlayers++;
-                if (readyAvailable && !matchStarted)
+                if (IsPlayerAutoReady(player))
+                {
+                    playerReadyStatus[player.UserId.Value] = true;
+                }
+                else if (readyAvailable && !matchStarted)
                 {
                     playerReadyStatus[player.UserId.Value] = false;
                 }
@@ -62,6 +67,7 @@ public partial class MatchZy
                     ExecUnpracCommands();
                     AutoStart();
                 }
+                CheckLiveRequired();
             }
             return HookResult.Continue;
 

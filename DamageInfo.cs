@@ -13,11 +13,10 @@ namespace MatchZy
         {
             foreach (var key in playerData.Keys) {
                 if (!playerData[key].IsValid) continue;
-                if (playerData[key].IsBot) continue;
                 int attackerId = key;
                 foreach (var key2 in playerData.Keys) {
                     if (key == key2) continue;
-                    if (!playerData[key2].IsValid || playerData[key2].IsBot) continue;
+                    if (!playerData[key2].IsValid) continue;
                     if (playerData[key].TeamNum == playerData[key2].TeamNum) continue;
                     if (playerData[key].TeamNum == 2) {
                         if (playerData[key2].TeamNum != 3) continue;
@@ -92,8 +91,8 @@ namespace MatchZy
                         if (attackerController != null && targetController != null)
                         {
                             if (!attackerController.IsValid || !targetController.IsValid) continue;
-                            if (attackerController.Connected != PlayerConnectedState.PlayerConnected) continue;
-                            if (targetController.Connected != PlayerConnectedState.PlayerConnected) continue;
+                            if (attackerController.Connected != PlayerConnectedState.PlayerConnected && !IsAutomatedMatchPlayer(attackerController)) continue;
+                            if (targetController.Connected != PlayerConnectedState.PlayerConnected && !IsAutomatedMatchPlayer(targetController)) continue;
                             if (!attackerController.PlayerPawn.IsValid || !targetController.PlayerPawn.IsValid) continue;
                             if (attackerController.PlayerPawn.Value == null || targetController.PlayerPawn.Value == null) continue;
 

@@ -252,7 +252,7 @@ namespace MatchZy
 
             AddCommandListener("jointeam", (player, info) =>
             {
-                if ((isMatchSetup || isVeto) && player != null && player.IsValid) {
+                if ((isMatchSetup || isVeto) && player != null && player.IsValid && !player.IsBot && !player.IsHLTV) {
                     if (int.TryParse(info.ArgByIndex(1), out int joiningTeam)) {
                         int playerTeam = (int)GetPlayerTeam(player);
                         if (joiningTeam != playerTeam) {
@@ -319,7 +319,12 @@ namespace MatchZy
                         AutoStart();
                         return;
                     }
-                    if (isWarmup) StartWarmup();
+                    if (isWarmup)
+                    {
+                        mapChangePending = false;
+                        StartWarmup();
+                        UpdatePlayersMap();
+                    }
                     if (isPractice) StartPracticeMode();
                 });
             });

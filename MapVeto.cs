@@ -24,6 +24,29 @@ namespace MatchZy
 
         public CsTeam lastVetoTeam = CsTeam.None;
 
+        private bool IsValidVetoCaptain(string team)
+        {
+            int captain = vetoCaptains[team];
+            return playerData.ContainsKey(captain) && playerData[captain].IsValid;
+        }
+
+        private bool IsAutomatedVetoCaptain(string team)
+        {
+            return IsValidVetoCaptain(team) && IsAutomatedMatchPlayer(playerData[vetoCaptains[team]]);
+        }
+
+        private int GetVetoTeamSide(string team)
+        {
+            Team matchzyTeam = team == "team1" ? matchzyTeam1 : matchzyTeam2;
+            return teamSides[matchzyTeam] == "CT" ? 3 : 2;
+        }
+
+        private string GetVetoTeamForSidePicker(CsTeam team)
+        {
+            Team matchzyTeam = team == CsTeam.CounterTerrorist ? reverseTeamSides["CT"] : reverseTeamSides["TERRORIST"];
+            return matchzyTeam == matchzyTeam1 ? "team1" : "team2";
+        }
+
         public void CreateVeto()
         {
             SwapPlayersToTeams();
@@ -60,15 +83,17 @@ namespace MatchZy
                 int team1Captain = vetoCaptains["team1"];
                 int team2Captain = vetoCaptains["team2"];
                 warningsPrinted = 0;
-                if (!playerData.ContainsKey(team1Captain) || !playerData.ContainsKey(team2Captain) || !playerData[team1Captain].IsValid || !playerData[team2Captain].IsValid)
+                if (!IsValidVetoCaptain("team1") || !IsValidVetoCaptain("team2"))
                 {
                     AbortVeto();
                     vetoStateTimer?.Kill();
                     vetoStateTimer = null;
                     return;
                 }
-                Server.PrintToChatAll($"{chatPrefix} Captain for {ChatColors.Green}{matchzyTeam1.teamName}{ChatColors.Default}: {ChatColors.Green}{playerData[team1Captain].PlayerName}{ChatColors.Default}");
-                Server.PrintToChatAll($"{chatPrefix} Captain for {ChatColors.Green}{matchzyTeam2.teamName}{ChatColors.Default}: {ChatColors.Green}{playerData[team2Captain].PlayerName}{ChatColors.Default}");
+                string team1CaptainName = IsAutomatedVetoCaptain("team1") ? "Automated bot captain" : playerData[team1Captain].PlayerName;
+                string team2CaptainName = IsAutomatedVetoCaptain("team2") ? "Automated bot captain" : playerData[team2Captain].PlayerName;
+                Server.PrintToChatAll($"{chatPrefix} Captain for {ChatColors.Green}{matchzyTeam1.teamName}{ChatColors.Default}: {ChatColors.Green}{team1CaptainName}{ChatColors.Default}");
+                Server.PrintToChatAll($"{chatPrefix} Captain for {ChatColors.Green}{matchzyTeam2.teamName}{ChatColors.Default}: {ChatColors.Green}{team2CaptainName}{ChatColors.Default}");
 
                 HandleVetoStep();
                 vetoStateTimer?.Kill();
@@ -90,7 +115,16 @@ namespace MatchZy
                     CsTeam otherMatchTeam = lastVetoTeam;
                     if (lastVetoTeam == CsTeam.Terrorist) otherMatchTeam = CsTeam.CounterTerrorist;
                     else if (lastVetoTeam == CsTeam.CounterTerrorist) otherMatchTeam = CsTeam.Terrorist;
-                    PromptForSideSelectionInChat(otherMatchTeam);
+                    string pickingTeam = GetVetoTeamForSidePicker(otherMatchTeam);
+                    if (IsAutomatedVetoCaptain(pickingTeam))
+                    {
+                        PickSide(CsTeam.CounterTerrorist, pickingTeam);
+                        HandleVetoStep();
+                    }
+                    else
+                    {
+                        PromptForSideSelectionInChat(otherMatchTeam);
+                    }
                 }
                 else
                 {
@@ -111,12 +145,45 @@ namespace MatchZy
                 else
                 {
                     // More than 1 map in the pool and not all maps are picked; present choices as determine by config.
-                    PromptForMapSelectionInChat(GetCurrentMapSelectionOption());
+                    string currentOption = GetCurrentMapSelectionOption();
+                    if (currentOption == "invalid")
+                    {
+                        FinishVeto();
+                        return;
+                    }
+                    string team = currentOption.StartsWith("team1") ? "team1" : "team2";
+                    if (IsAutomatedVetoCaptain(team))
+                    {
+                        HandleAutomatedVetoStep(currentOption);
+                    }
+                    else
+                    {
+                        PromptForMapSelectionInChat(currentOption);
+                    }
                 }
             }
             else
             {
                 FinishVeto();
+            }
+        }
+
+        public void HandleAutomatedVetoStep(string option)
+        {
+            if (option == "invalid" || matchConfig.MapsLeftInVetoPool.Count == 0)
+            {
+                FinishVeto();
+                return;
+            }
+
+            string team = option.StartsWith("team1") ? "team1" : "team2";
+            int teamSide = GetVetoTeamSide(team);
+            string mapName = matchConfig.MapsLeftInVetoPool[0];
+            bool handled = option.EndsWith("_ban") ? BanMap(mapName, teamSide) : PickMap(mapName, teamSide);
+
+            if (handled)
+            {
+                HandleVetoStep();
             }
         }
 
@@ -346,7 +413,8 @@ namespace MatchZy
                 playerReadyStatus[key] = false;
             }
 
-            if (IsMapReloadRequiredForGameMode(matchConfig.Wingman) || mapReloadRequired || currentMapName != mapToPlay) {
+            bool mapChangeRequired = IsMapReloadRequiredForGameMode(matchConfig.Wingman) || mapReloadRequired || currentMapName != mapToPlay;
+            if (mapChangeRequired) {
 
                 SetCorrectGameMode();
                 float delay = 7.0f;
@@ -365,6 +433,10 @@ namespace MatchZy
             isPreVeto = false;
             isVeto = false;
             StartWarmup();
+            if (!mapChangeRequired)
+            {
+                CheckLiveRequired();
+            }
         }
 
 
@@ -372,20 +444,26 @@ namespace MatchZy
         {
             Team matchzyTeam = team == "team1" ? matchzyTeam1 : matchzyTeam2;
             int teamSide = teamSides[matchzyTeam] == "CT" ? 3 : 2;
+            int automatedCaptain = -1;
             foreach (var key in playerData.Keys)
             {
-                if (!playerData[key].IsValid || playerData[key].IsBot) continue;
-                if (playerData[key].TeamNum == teamSide) return key;
+                if (!playerData[key].IsValid) continue;
+                if (playerData[key].TeamNum != teamSide) continue;
+                if (IsConnectedHumanMatchPlayer(playerData[key])) return key;
+                if (automatedCaptain == -1 && IsAutomatedMatchPlayer(playerData[key]))
+                {
+                    automatedCaptain = key;
+                }
             }
 
-            return -1;
+            return automatedCaptain;
         }
 
         public void SwapPlayersToTeams()
         {
             foreach (var key in playerData.Keys)
             {
-                if (!playerData[key].IsValid || playerData[key].IsBot) continue;
+                if (!playerData[key].IsValid) continue;
                 playerData[key].SwitchTeam(GetPlayerTeam(playerData[key]));
             }
         }

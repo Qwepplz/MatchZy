@@ -202,7 +202,7 @@ public partial class MatchZy
                 && p.TeamNum == (int)CsTeam.Terrorist
                 && p.PawnIsAlive
             );
-        if (!IsPlayerValid(target)) return; // should never trigger
+        if (target == null || !IsPlayerValid(target)) return; // should never trigger
 
         // transfer bomb
         Log($"[EventPlayerGivenC4 INFO] Transferred bomb from {coach.PlayerName} (Coach) to {target.PlayerName}.");

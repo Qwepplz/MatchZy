@@ -54,9 +54,7 @@ public partial class MatchZy
                     playerReadyStatus[player.UserId.Value] = true;
                 }
             }
-            // May not be required, but just to be on safe side so that player data is properly updated in dictionaries
-            // Update: Commenting the below function as it was being called multiple times on map change.
-            // UpdatePlayersMap();
+            // Keep existing first-player warmup behavior before refreshing the full controller map.
 
             if (readyAvailable && !matchStarted)
             {
@@ -67,7 +65,12 @@ public partial class MatchZy
                     ExecUnpracCommands();
                     AutoStart();
                 }
+                UpdatePlayersMap();
                 CheckLiveRequired();
+            }
+            else
+            {
+                UpdatePlayersMap();
             }
             return HookResult.Continue;
 
@@ -111,6 +114,8 @@ public partial class MatchZy
             noFlashList.Remove(userId);
             lastGrenadesData.Remove(userId);
             nadeSpecificLastGrenadeData.Remove(userId);
+
+            EnforceMatchPlayerLimit();
 
             return HookResult.Continue;
         }

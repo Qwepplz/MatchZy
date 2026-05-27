@@ -21,6 +21,7 @@ namespace MatchZy
         public const string knifeCfgPath = "MatchZy/knife.cfg";
         public const string liveCfgPath = "MatchZy/live.cfg";
         public const string liveWingmanCfgPath = "MatchZy/live_wingman.cfg";
+        private const int maxTrackedMatchPlayers = 10;
 
         private void PrintToAllChat(string message)
         {
@@ -150,6 +151,45 @@ namespace MatchZy
             return IsAutomatedMatchPlayer(player);
         }
 
+        private IEnumerable<MatchPlayerSlot> GetTrackedMatchPlayerSlots()
+        {
+            return playerData
+                .Where(kv => kv.Value.IsValid)
+                .Select(kv => new MatchPlayerSlot(
+                    kv.Key,
+                    IsAutomatedMatchPlayer(kv.Value),
+                    playerReadyStatus.TryGetValue(kv.Key, out bool ready) && ready));
+        }
+
+        private int GetReadyPlayerCount()
+        {
+            return MatchPlayerSlotLimiter.GetReadyPlayerCount(GetTrackedMatchPlayerSlots());
+        }
+
+        private void EnforceMatchPlayerLimit()
+        {
+            if (isPractice || isSleep) return;
+
+            List<MatchPlayerSlot> playerSlots = GetTrackedMatchPlayerSlots().ToList();
+            int desiredBotCount = MatchPlayerSlotLimiter.GetDesiredAutomatedPlayerCount(playerSlots, maxTrackedMatchPlayers);
+            IReadOnlyList<int> automatedPlayerIdsToRemove = MatchPlayerSlotLimiter.GetAutomatedPlayerIdsToRemove(playerSlots, maxTrackedMatchPlayers);
+
+            foreach (int userId in automatedPlayerIdsToRemove)
+            {
+                if (!playerData.TryGetValue(userId, out CCSPlayerController? player)) continue;
+                if (!IsAutomatedMatchPlayer(player)) continue;
+
+                Log($"[EnforceMatchPlayerLimit] Kicking bot {player.PlayerName} ({userId}) to keep total players at {maxTrackedMatchPlayers}.");
+                Server.ExecuteCommand($"kickid {(ushort)userId}");
+                playerData.Remove(userId);
+                playerReadyStatus.Remove(userId);
+            }
+
+            Server.ExecuteCommand($"bot_quota {desiredBotCount}");
+
+            connectedPlayers = playerData.Count;
+        }
+
         private bool ShouldTrackPlayer(CCSPlayerController player)
         {
             if (!player.IsValid || player.IsHLTV) return false;
@@ -217,7 +257,7 @@ namespace MatchZy
             }
             else
             {
-                int countOfReadyPlayers = playerData.Count(kv => playerReadyStatus.TryGetValue(kv.Key, out bool ready) && (ready || IsPlayerAutoReady(kv.Value)));
+                int countOfReadyPlayers = GetReadyPlayerCount();
                 if (isMatchSetup)
                 {
                     // Server.PrintToChatAll($"{chatPrefix} Current ready players: {ChatColors.Green}{countOfReadyPlayers}{ChatColors.Default}");
@@ -618,6 +658,7 @@ namespace MatchZy
                         playerReadyStatus.Remove(key);
                     }
                 }
+                EnforceMatchPlayerLimit();
                 Log($"[UpdatePlayersMap] CCSPlayerController count: {playerEntities.Count<CCSPlayerController>()}, RealPlayersCount: {GetRealPlayersCount()}");
                 if (!mapChangePending)
                 {
@@ -759,7 +800,7 @@ namespace MatchZy
             if (mapChangePending) return;
 
             // Todo: Implement a same ready system for both pug and match
-            int countOfReadyPlayers = playerData.Count(kv => playerReadyStatus.TryGetValue(kv.Key, out bool ready) && (ready || IsPlayerAutoReady(kv.Value)));
+            int countOfReadyPlayers = GetReadyPlayerCount();
             bool liveRequired = false;
             if (isMatchSetup)
             {
@@ -877,7 +918,8 @@ namespace MatchZy
         {
             // Currently it is not possible to keep updating player tags while in warmup without restarting the match
             // Hence returning from here until we find a proper solution
-            return;
+            bool clanTagUpdatesEnabled = false;
+            if (!clanTagUpdatesEnabled) return;
 
             if (readyAvailable && !matchStarted)
             {

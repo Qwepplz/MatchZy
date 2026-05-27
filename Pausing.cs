@@ -12,7 +12,8 @@ public partial class MatchZy
     public void TechPause(CCSPlayerController? player, CommandInfo? command)
     {
         // Tech Pause is WIP
-        return;
+        bool techPauseWipEnabled = false;
+        if (!techPauseWipEnabled) return;
 
         if (!isMatchLive) return;
 
@@ -50,7 +51,7 @@ public partial class MatchZy
 
         if (player.Team == CsTeam.Spectator || player.Team == CsTeam.None) return;
 
-        if (!techPauseEnabled.Value && player != null)
+        if (!techPauseEnabled.Value)
         {
             PrintToPlayerChat(player, Localizer["matchzy.ready.techpausenotenabled"]);
             return;
@@ -58,7 +59,7 @@ public partial class MatchZy
 
         if (maxTechPausesAllowed.Value <= 0) return;
 
-        Team playerTeam = (player!.Team == CsTeam.CounterTerrorist) ? reverseTeamSides["CT"] : reverseTeamSides["TERRORIST"];
+        Team playerTeam = (player.Team == CsTeam.CounterTerrorist) ? reverseTeamSides["CT"] : reverseTeamSides["TERRORIST"];
         if (technicalPauseUsed[playerTeam] >= maxTechPausesAllowed.Value)
         {
             PrintToPlayerChat(player, Localizer["matchzy.pause.notechpauseleft", playerTeam.teamName]);

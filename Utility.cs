@@ -166,6 +166,16 @@ namespace MatchZy
             return MatchPlayerSlotLimiter.GetReadyPlayerCount(GetTrackedMatchPlayerSlots());
         }
 
+        private int GetHumanPlayerCount()
+        {
+            return MatchPlayerSlotLimiter.GetHumanPlayerCount(GetTrackedMatchPlayerSlots());
+        }
+
+        private int GetHumanReadyPlayerCount()
+        {
+            return MatchPlayerSlotLimiter.GetReadyHumanPlayerCount(GetTrackedMatchPlayerSlots());
+        }
+
         private void EnforceMatchPlayerLimit()
         {
             if (isPractice || isSleep) return;
@@ -257,7 +267,7 @@ namespace MatchZy
             }
             else
             {
-                int countOfReadyPlayers = GetReadyPlayerCount();
+                int countOfReadyPlayers = isMatchSetup ? GetReadyPlayerCount() : GetHumanReadyPlayerCount();
                 if (isMatchSetup)
                 {
                     // Server.PrintToChatAll($"{chatPrefix} Current ready players: {ChatColors.Green}{countOfReadyPlayers}{ChatColors.Default}");
@@ -799,8 +809,9 @@ namespace MatchZy
             if (!readyAvailable || matchStarted) return;
             if (mapChangePending) return;
 
-            // Todo: Implement a same ready system for both pug and match
-            int countOfReadyPlayers = GetReadyPlayerCount();
+            // Pug / scrim auto-start should only consider human readiness.
+            int countOfReadyPlayers = isMatchSetup ? GetReadyPlayerCount() : GetHumanReadyPlayerCount();
+            int humanPlayerCount = GetHumanPlayerCount();
             bool liveRequired = false;
             if (isMatchSetup)
             {
@@ -811,7 +822,7 @@ namespace MatchZy
             }
             else if (minimumReadyRequired == 0)
             {
-                if (countOfReadyPlayers >= connectedPlayers && connectedPlayers > 0)
+                if (countOfReadyPlayers >= humanPlayerCount && humanPlayerCount > 0)
                 {
                     liveRequired = true;
                 }

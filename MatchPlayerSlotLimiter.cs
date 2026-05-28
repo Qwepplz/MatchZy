@@ -32,6 +32,16 @@ internal static class MatchPlayerSlotLimiter
         return playerSlots.Count(player => player.IsAutomated || player.IsReady);
     }
 
+    internal static int GetHumanPlayerCount(IEnumerable<MatchPlayerSlot> playerSlots)
+    {
+        return playerSlots.Count(player => !player.IsAutomated);
+    }
+
+    internal static int GetReadyHumanPlayerCount(IEnumerable<MatchPlayerSlot> playerSlots)
+    {
+        return playerSlots.Count(player => !player.IsAutomated && player.IsReady);
+    }
+
     internal static int GetDesiredAutomatedPlayerCount(IEnumerable<MatchPlayerSlot> playerSlots, int maxPlayers)
     {
         if (maxPlayers < 0)

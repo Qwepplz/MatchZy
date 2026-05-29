@@ -386,7 +386,8 @@ namespace MatchZy
                 stopData["ct"] = false;
                 stopData["t"] = false;
                 isPaused = true;
-                unpauseData["pauseTeam"] = "RoundRestore";
+                pauseTeamName = "RoundRestore";
+                unpausePlayerVotes.Clear();
                 pausedStateTimer ??= AddTimer(chatTimerDelay, SendPausedStateMessage, TimerFlags.REPEAT);
             }
         }

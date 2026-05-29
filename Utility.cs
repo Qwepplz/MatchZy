@@ -287,28 +287,88 @@ namespace MatchZy
         {
             if (isPaused && matchStarted)
             {
-                var pauseTeamName = unpauseData["pauseTeam"];
-                if ((string)pauseTeamName == "Admin")
+                if (pauseTeamName == "Admin")
                 {
                     PrintToAllChat(Localizer["matchzy.pause.adminpausedthematch"]);
                 }
-                else if ((string)pauseTeamName == "RoundRestore" && !(bool)unpauseData["t"] && !(bool)unpauseData["ct"])
+                else if (pauseTeamName == "RoundRestore" && unpausePlayerVotes.Count == 0)
                 {
                     PrintToAllChat(Localizer["matchzy.pause.pausedbecauserestore"]);
                 }
-                else if ((bool)unpauseData["t"] && !(bool)unpauseData["ct"])
+                else if (unpausePlayerVotes.Count > 0)
                 {
-                    PrintToAllChat(Localizer["matchzy.pause.teamwantstounpause", reverseTeamSides["TERRORIST"].teamName, reverseTeamSides["CT"].teamName]);
+                    PrintPendingUnpauseMessage(GetCurrentUnpauseRequesterName());
                 }
-                else if (!(bool)unpauseData["t"] && (bool)unpauseData["ct"])
-                {
-                    PrintToAllChat(Localizer["matchzy.pause.teamwantstounpause", reverseTeamSides["CT"].teamName, reverseTeamSides["TERRORIST"].teamName]);
-                }
-                else if (!(bool)unpauseData["t"] && !(bool)unpauseData["ct"])
+                else
                 {
                     PrintToAllChat(Localizer["matchzy.pause.pausedthematch", pauseTeamName]);
                 }
             }
+        }
+
+        private void PrintPendingUnpauseMessage(string requesterName)
+        {
+            string pendingPlayers = GetPendingUnpausePlayerNames();
+            if (!string.IsNullOrEmpty(pendingPlayers))
+            {
+                PrintToAllChat(Localizer["matchzy.pause.waitingforplayers", requesterName, pendingPlayers]);
+            }
+        }
+
+        private string GetCurrentUnpauseRequesterName()
+        {
+            foreach (CCSPlayerController player in GetConnectedHumanMatchPlayers())
+            {
+                if (unpausePlayerVotes.Contains(player.SteamID))
+                {
+                    return player.PlayerName;
+                }
+            }
+            return Localizer["matchzy.pause.unknownplayer"];
+        }
+
+        private string GetPendingUnpausePlayerNames()
+        {
+            List<string> pendingPlayers = new();
+            foreach (CCSPlayerController player in GetConnectedHumanMatchPlayers())
+            {
+                if (!unpausePlayerVotes.Contains(player.SteamID))
+                {
+                    pendingPlayers.Add(player.PlayerName);
+                }
+            }
+            return string.Join(", ", pendingPlayers);
+        }
+
+        private List<CCSPlayerController> GetConnectedHumanMatchPlayers()
+        {
+            List<CCSPlayerController> players = new();
+            foreach (CCSPlayerController player in playerData.Values)
+            {
+                if (IsConnectedHumanMatchPlayer(player) && player.TeamNum is 2 or 3)
+                {
+                    players.Add(player);
+                }
+            }
+            return players;
+        }
+
+        private bool HaveAllHumanPlayersVotedToUnpause()
+        {
+            List<CCSPlayerController> players = GetConnectedHumanMatchPlayers();
+            return players.Count > 0 && players.All(player => unpausePlayerVotes.Contains(player.SteamID));
+        }
+
+        private bool TryUnpauseIfAllHumanPlayersVoted()
+        {
+            if (!HaveAllHumanPlayersVotedToUnpause())
+            {
+                return false;
+            }
+
+            PrintToAllChat(Localizer["matchzy.pause.playersunpausedthematch"]);
+            UnpauseMatch();
+            return true;
         }
 
         private void ExecWarmupCfg()
@@ -536,12 +596,8 @@ namespace MatchZy
                 HandleClanTags();
 
                 // Reset unpause data
-                Dictionary<string, object> unpauseData = new()
-                {
-                    { "ct", false },
-                    { "t", false },
-                    { "pauseTeam", "" }
-                };
+                pauseTeamName = "";
+                unpausePlayerVotes.Clear();
 
                 // Reset stop data
                 stopData["ct"] = false;
@@ -1289,23 +1345,21 @@ namespace MatchZy
             if (isMatchLive && !isPaused)
             {
 
-                string pauseTeamName = "Admin";
-                unpauseData["pauseTeam"] = "Admin";
+                pauseTeamName = "Admin";
                 if (player?.TeamNum == 2)
                 {
 
                     pauseTeamName = reverseTeamSides["TERRORIST"].teamName;
-                    unpauseData["pauseTeam"] = reverseTeamSides["TERRORIST"].teamName;
                 }
                 else if (player?.TeamNum == 3)
                 {
                     pauseTeamName = reverseTeamSides["CT"].teamName;
-                    unpauseData["pauseTeam"] = reverseTeamSides["CT"].teamName;
                 }
                 else
                 {
                     return;
                 }
+                unpausePlayerVotes.Clear();
                 PrintToAllChat(Localizer["matchzy.pause.pausedthematch", pauseTeamName]);
                 // Server.PrintToChatAll($"{chatPrefix} {ChatColors.Green}{pauseTeamName}{ChatColors.Default} has paused the match. Type .unpause to unpause the match");
 
@@ -1345,7 +1399,8 @@ namespace MatchZy
                 ReplyToUserCommand(player, Localizer["matchzy.utility.tacticaltimeout"]);
                 return;
             }
-            unpauseData["pauseTeam"] = "Admin";
+            pauseTeamName = "Admin";
+            unpausePlayerVotes.Clear();
             PrintToAllChat(Localizer["matchzy.pause.adminpausedthematch"]);
             // Server.PrintToChatAll($"{chatPrefix} {ChatColors.Green}Admin{ChatColors.Default} has paused the match.");
             if (player == null)
@@ -1378,8 +1433,7 @@ namespace MatchZy
         {
             Server.ExecuteCommand("mp_unpause_match;");
             isPaused = false;
-            unpauseData["ct"] = false;
-            unpauseData["t"] = false;
+            unpausePlayerVotes.Clear();
             if (!isPaused && pausedStateTimer != null)
             {
                 pausedStateTimer.Kill();

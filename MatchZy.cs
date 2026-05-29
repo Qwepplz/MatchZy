@@ -39,11 +39,8 @@ namespace MatchZy
 
         // Pause Data
         public bool isPaused = false;
-        public Dictionary<string, object> unpauseData = new Dictionary<string, object> {
-            { "ct", false },
-            { "t", false },
-            { "pauseTeam", "" }
-        };
+        private string pauseTeamName = "";
+        private readonly HashSet<ulong> unpausePlayerVotes = new();
 
         bool isPauseCommandForTactical = false;
 

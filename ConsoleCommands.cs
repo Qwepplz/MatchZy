@@ -226,67 +226,29 @@ namespace MatchZy
         [ConsoleCommand("css_unpause", "Unpause the match")]
         public void OnUnpauseCommand(CCSPlayerController? player, CommandInfo? command)
         {
-            if (isMatchLive && isPaused)
+            if (!isMatchLive || !isPaused)
             {
-                var pauseTeamName = unpauseData["pauseTeam"];
-                if ((string)pauseTeamName == "Admin" && player != null)
-                {
-                    PrintToPlayerChat(player, Localizer["matchzy.pause.onlyadmincanunpause"]);
-                    return;
-                }
-
-                string unpauseTeamName = "Admin";
-                string remainingUnpauseTeam = "Admin";
-                if (player?.TeamNum == 2)
-                {
-                    unpauseTeamName = reverseTeamSides["TERRORIST"].teamName;
-                    remainingUnpauseTeam = reverseTeamSides["CT"].teamName;
-                    if (!(bool)unpauseData["t"])
-                    {
-                        unpauseData["t"] = true;
-                    }
-
-                }
-                else if (player?.TeamNum == 3)
-                {
-                    unpauseTeamName = reverseTeamSides["CT"].teamName;
-                    remainingUnpauseTeam = reverseTeamSides["TERRORIST"].teamName;
-                    if (!(bool)unpauseData["ct"])
-                    {
-                        unpauseData["ct"] = true;
-                    }
-                }
-                else
-                {
-                    return;
-                }
-                if ((bool)unpauseData["t"] && (bool)unpauseData["ct"])
-                {
-                    PrintToAllChat(Localizer["matchzy.pause.teamsunpausedthematch"]);
-                    Server.ExecuteCommand("mp_unpause_match;");
-                    isPaused = false;
-                    unpauseData["ct"] = false;
-                    unpauseData["t"] = false;
-                }
-                else if (unpauseTeamName == "Admin")
-                {
-                    PrintToAllChat(Localizer["matchzy.pause.adminunpausedthematch"]);
-                    Server.ExecuteCommand("mp_unpause_match;");
-                    isPaused = false;
-                    unpauseData["ct"] = false;
-                    unpauseData["t"] = false;
-                }
-                else
-                {
-                    PrintToAllChat(Localizer["matchzy.pause.teamwantstounpause", unpauseTeamName, remainingUnpauseTeam]);
-                    // Server.PrintToChatAll($"{chatPrefix} {ChatColors.Green}{unpauseTeamName}{ChatColors.Default} wants to unpause the match. {ChatColors.Green}{remainingUnpauseTeam}{ChatColors.Default}, please write !unpause to confirm.");
-                }
-                if (!isPaused && pausedStateTimer != null)
-                {
-                    pausedStateTimer.Kill();
-                    pausedStateTimer = null;
-                }
+                return;
             }
+
+            if (pauseTeamName == "Admin" && player != null)
+            {
+                PrintToPlayerChat(player, Localizer["matchzy.pause.onlyadmincanunpause"]);
+                return;
+            }
+
+            if (player == null || player.TeamNum is not (2 or 3) || !IsConnectedHumanMatchPlayer(player))
+            {
+                return;
+            }
+
+            unpausePlayerVotes.Add(player.SteamID);
+            if (TryUnpauseIfAllHumanPlayersVoted())
+            {
+                return;
+            }
+
+            PrintPendingUnpauseMessage(player.PlayerName);
         }
 
         [ConsoleCommand("css_tac", "Starts a tactical timeout for the requested team")]

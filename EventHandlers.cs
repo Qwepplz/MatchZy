@@ -116,6 +116,10 @@ public partial class MatchZy
             nadeSpecificLastGrenadeData.Remove(userId);
 
             EnforceMatchPlayerLimit();
+            if (isPaused && pauseTeamName != "Admin")
+            {
+                TryUnpauseIfAllHumanPlayersVoted();
+            }
 
             return HookResult.Continue;
         }

@@ -56,12 +56,13 @@ namespace MatchZy
             // if (pauseOnVeto) {
             //     Server.ExecuteCommand("mp_pause_match");
             //     isPaused = true;
-            //     unpauseData["pauseTeam"] = "Admin";
+            //     pauseTeamName = "Admin";
             // }
             Server.ExecuteCommand("mp_warmup_end");
             Server.ExecuteCommand("mp_pause_match");
             isPaused = true;
-            unpauseData["pauseTeam"] = "Admin";
+            pauseTeamName = "Admin";
+            unpausePlayerVotes.Clear();
             vetoStateTimer = AddTimer(1, VetoCountdown, TimerFlags.REPEAT);
             isVeto = true;
             readyAvailable = false;

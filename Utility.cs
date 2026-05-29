@@ -253,7 +253,7 @@ namespace MatchZy
             if (unreadyPlayers.Count > 0)
             {
                 string unreadyPlayerList = string.Join(", ", unreadyPlayers);
-                string minimumReadyRequiredMessage = isMatchSetup ? "" : $"[Minimum ready players required: {ChatColors.Green}{minimumReadyRequired}{ChatColors.Default}]";
+                string minimumReadyRequiredMessage = "";
 
                 // Server.PrintToChatAll($"{chatPrefix} Unready players: {unreadyPlayerList}. Please type .ready to ready up! {minimumReadyRequiredMessage}");
                 if (isRoundRestorePending)
@@ -268,16 +268,8 @@ namespace MatchZy
             else
             {
                 int countOfReadyPlayers = isMatchSetup ? GetReadyPlayerCount() : GetHumanReadyPlayerCount();
-                if (isMatchSetup)
-                {
-                    // Server.PrintToChatAll($"{chatPrefix} Current ready players: {ChatColors.Green}{countOfReadyPlayers}{ChatColors.Default}");
-                    PrintToAllChat(Localizer["matchzy.utility.readyplayers", countOfReadyPlayers]);
-                }
-                else
-                {
-                    // Server.PrintToChatAll($"{chatPrefix} Minimum ready players required {ChatColors.Green}{minimumReadyRequired}{ChatColors.Default}, current ready players: {ChatColors.Green}{countOfReadyPlayers}{ChatColors.Default}");
-                    PrintToAllChat(Localizer["matchzy.utility.minimumreadyplayers", minimumReadyRequired, countOfReadyPlayers]);
-                }
+                // Server.PrintToChatAll($"{chatPrefix} Current ready players: {ChatColors.Green}{countOfReadyPlayers}{ChatColors.Default}");
+                PrintToAllChat(Localizer["matchzy.utility.readyplayers", countOfReadyPlayers]);
             }
         }
 
@@ -809,32 +801,7 @@ namespace MatchZy
             if (!readyAvailable || matchStarted) return;
             if (mapChangePending) return;
 
-            // Pug / scrim auto-start should only consider human readiness.
-            int countOfReadyPlayers = isMatchSetup ? GetReadyPlayerCount() : GetHumanReadyPlayerCount();
-            int humanPlayerCount = GetHumanPlayerCount();
-            bool liveRequired = false;
-            if (isMatchSetup)
-            {
-                if (IsTeamsReady() && IsSpectatorsReady())
-                {
-                    liveRequired = true;
-                }
-            }
-            else if (minimumReadyRequired == 0)
-            {
-                if (countOfReadyPlayers >= humanPlayerCount && humanPlayerCount > 0)
-                {
-                    liveRequired = true;
-                }
-            }
-            else if (countOfReadyPlayers >= minimumReadyRequired)
-            {
-                liveRequired = true;
-            }
-            if (liveRequired)
-            {
-                HandleMatchStart();
-            }
+            // Match start is intentionally manual; .ready only records readiness.
         }
 
         private void HandleMatchStart()

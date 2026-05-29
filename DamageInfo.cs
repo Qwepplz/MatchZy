@@ -102,26 +102,29 @@ namespace MatchZy
                             hitsTaken = takenInfo.Hits;
                         }
 
-                        if (!playerData.ContainsKey(attackerId) || !playerData.ContainsKey(targetId)) continue;
+                        if (!playerData.TryGetValue(attackerId, out var attackerController) || !playerData.TryGetValue(targetId, out var targetController)) continue;
+                        if (!CanUseDamageReportPlayer(attackerController) || !CanUseDamageReportPlayer(targetController)) continue;
 
-                        var attackerController = playerData[attackerId];
-                        var targetController = playerData[targetId];
-
-                        if (attackerController != null && targetController != null)
+                        bool canSendToAttacker = CanSendDamageReportToPlayer(attackerController);
+                        bool canSendToTarget = CanSendDamageReportToPlayer(targetController);
+                        if (!canSendToAttacker && !canSendToTarget)
                         {
-                            if (!attackerController.IsValid || !targetController.IsValid) continue;
-                            if (attackerController.Connected != PlayerConnectedState.PlayerConnected && !IsAutomatedMatchPlayer(attackerController)) continue;
-                            if (targetController.Connected != PlayerConnectedState.PlayerConnected && !IsAutomatedMatchPlayer(targetController)) continue;
-                            if (!attackerController.PlayerPawn.IsValid || !targetController.PlayerPawn.IsValid) continue;
-                            if (attackerController.PlayerPawn.Value == null || targetController.PlayerPawn.Value == null) continue;
+                            processedPairs.Add((attackerId, targetId));
+                            continue;
+                        }
 
-                            int attackerHP = attackerController.PlayerPawn.Value.Health < 0 ? 0 : attackerController.PlayerPawn.Value.Health;
-                            string attackerName = attackerController.PlayerName;
+                        int attackerHP = GetDamageReportHealth(attackerId, attackerController);
+                        string attackerName = attackerController.PlayerName;
 
-                            int targetHP = targetController.PlayerPawn.Value.Health < 0 ? 0 : targetController.PlayerPawn.Value.Health;
-                            string targetName = targetController.PlayerName;
+                        int targetHP = GetDamageReportHealth(targetId, targetController);
+                        string targetName = targetController.PlayerName;
 
+                        if (canSendToAttacker)
+                        {
                             PrintToPlayerChat(attackerController, $"{ChatColors.Green}To: [{damageGiven} / {hitsGiven} hits] From: [{damageTaken} / {hitsTaken} hits] - {targetName} - ({targetHP} hp){ChatColors.Default}");
+                        }
+                        if (canSendToTarget)
+                        {
                             PrintToPlayerChat(targetController, $"{ChatColors.Green}To: [{damageTaken} / {hitsTaken} hits] From: [{damageGiven} / {hitsGiven} hits] - {attackerName} - ({attackerHP} hp){ChatColors.Default}");
                         }
 
@@ -134,6 +137,32 @@ namespace MatchZy
             {
                 Log($"[ShowDamageInfo FATAL] An error occurred: {e.Message}");
             }
+        }
+
+        private bool CanUseDamageReportPlayer(CCSPlayerController player)
+        {
+            if (!player.IsValid || player.IsHLTV) return false;
+            if (IsAutomatedMatchPlayer(player)) return true;
+
+            return player.Connected == PlayerConnectedState.PlayerConnected;
+        }
+
+        private static bool CanSendDamageReportToPlayer(CCSPlayerController player)
+        {
+            return player.IsValid
+                && !player.IsBot
+                && !player.IsHLTV
+                && player.Connected == PlayerConnectedState.PlayerConnected;
+        }
+
+        private int GetDamageReportHealth(int playerId, CCSPlayerController player)
+        {
+            if (player.PlayerPawn.IsValid && player.PlayerPawn.Value != null)
+            {
+                return ClampPlayerHealth(player.PlayerPawn.Value.Health);
+            }
+
+            return playerRoundHealth.TryGetValue(playerId, out int health) ? ClampPlayerHealth(health) : 0;
         }
 
         private static int ClampPlayerHealth(int health)

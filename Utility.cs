@@ -138,7 +138,17 @@ namespace MatchZy
 
         private int GetRealPlayersCount()
         {
-            return playerData.Count;
+            int realPlayers = 0;
+            foreach (var player in playerData.Values)
+            {
+                if (player == null) continue;
+                if (!player.IsValid || player.IsBot || player.IsHLTV) continue;
+                if (player.Connected != PlayerConnectedState.PlayerConnected) continue;
+
+                realPlayers++;
+            }
+
+            return realPlayers;
         }
 
         private bool IsAutomatedMatchPlayer(CCSPlayerController player)

@@ -11,9 +11,16 @@ namespace MatchZy
 
         private void InitPlayerDamageInfo()
         {
+            playerDamageInfo.Clear();
+            playerRoundHealth.Clear();
+
             foreach (var key in playerData.Keys) {
-                if (!playerData[key].IsValid) continue;
+                CCSPlayerController player = playerData[key];
+                if (!IsPlayerValid(player)) continue;
+
                 int attackerId = key;
+                playerRoundHealth[attackerId] = ClampPlayerHealth(player.PlayerPawn.Value!.Health);
+
                 foreach (var key2 in playerData.Keys) {
                     if (key == key2) continue;
                     if (!playerData[key2].IsValid) continue;
@@ -40,6 +47,8 @@ namespace MatchZy
         }
 
 		public Dictionary<int, Dictionary<int, DamagePlayerInfo>> playerDamageInfo = new Dictionary<int, Dictionary<int, DamagePlayerInfo>>();
+        private const int MaxPlayerHealth = 100;
+        private readonly Dictionary<int, int> playerRoundHealth = new();
 		private void UpdatePlayerDamageInfo(EventPlayerHurt @event, int targetId)
 		{
             CCSPlayerController? attacker = @event.Attacker;
@@ -52,15 +61,25 @@ namespace MatchZy
 			if (!attackerInfo.TryGetValue(targetId, out var targetInfo))
 				attackerInfo[targetId] = targetInfo = new DamagePlayerInfo();
 
-			targetInfo.DamageHP += @event.DmgHealth;
+            int reportedDamage = Math.Max(0, @event.DmgHealth);
+            int postDamageHealth = ClampPlayerHealth(@event.Health);
+            if (!playerRoundHealth.TryGetValue(targetId, out var previousHealth))
+            {
+                previousHealth = Math.Min(MaxPlayerHealth, postDamageHealth + reportedDamage);
+            }
+
+            int actualDamage = Math.Min(Math.Max(0, ClampPlayerHealth(previousHealth) - postDamageHealth), reportedDamage);
+            targetInfo.DamageHP += actualDamage;
+            playerRoundHealth[targetId] = postDamageHealth;
 			targetInfo.Hits++;
 		}
 
         private void ShowDamageInfo()
         {
-            if (!enableDamageReport.Value) return;
             try
             {
+                if (!enableDamageReport.Value) return;
+
                 HashSet<(int, int)> processedPairs = new HashSet<(int, int)>();
 
                 foreach (var entry in playerDamageInfo)
@@ -110,13 +129,16 @@ namespace MatchZy
                         processedPairs.Add((attackerId, targetId));
                     }
                 }
-                playerDamageInfo.Clear();
             }
             catch (Exception e)
             {
                 Log($"[ShowDamageInfo FATAL] An error occurred: {e.Message}");
             }
+        }
 
+        private static int ClampPlayerHealth(int health)
+        {
+            return Math.Clamp(health, 0, MaxPlayerHealth);
         }
     }
 

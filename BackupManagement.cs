@@ -44,6 +44,11 @@ namespace MatchZy
             Log($"[!stop command] Sent by: {player.UserId}, TeamNum: {player.TeamNum}, connectedPlayers: {connectedPlayers}");
             if (isStopCommandAvailable && isMatchLive)
             {
+                if (!IsPlayerAdmin(player, "css_stop", "@css/config"))
+                {
+                    SendPlayerNotAdminMessage(player);
+                    return;
+                }
                 if (IsHalfTimePhase())
                 {
                     // ReplyToUserCommand(player, "You cannot use this command during halftime.");

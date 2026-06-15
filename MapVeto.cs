@@ -368,7 +368,7 @@ namespace MatchZy
         {
             // Todo: Add AbortVeto() when captain is disconnecting in-between veto
             Server.PrintToChatAll($"{chatPrefix} A team captain left during map selection. Map selection is paused.");
-            Server.PrintToChatAll($"{chatPrefix} Type .ready when you are ready to resume map selection.");
+            Server.PrintToChatAll($"{chatPrefix} Type .start when you are ready to resume map selection.");
             isPreVeto = true;
             isVeto = false;
             if (isPaused)
@@ -380,7 +380,7 @@ namespace MatchZy
                 {"team2", -1}
             };
             foreach (var key in playerReadyStatus.Keys) {
-                playerReadyStatus[key] = false;
+                playerReadyStatus[key] = true;
             }
             readyAvailable = true;
             isWarmup = true;
@@ -411,7 +411,7 @@ namespace MatchZy
             SetMapSides();
             ExecuteChangedConvars();
             foreach (var key in playerReadyStatus.Keys) {
-                playerReadyStatus[key] = false;
+                playerReadyStatus[key] = true;
             }
 
             bool mapChangeRequired = IsMapReloadRequiredForGameMode(matchConfig.Wingman) || mapReloadRequired || currentMapName != mapToPlay;

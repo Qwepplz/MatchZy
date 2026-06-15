@@ -41,18 +41,8 @@ public partial class MatchZy
             {
                 playerData[player.UserId.Value] = player;
                 connectedPlayers++;
-                if (IsPlayerAutoReady(player))
-                {
-                    playerReadyStatus[player.UserId.Value] = true;
-                }
-                else if (readyAvailable && !matchStarted)
-                {
-                    playerReadyStatus[player.UserId.Value] = false;
-                }
-                else
-                {
-                    playerReadyStatus[player.UserId.Value] = true;
-                }
+                // Ready system removed: every connected player is treated as ready.
+                playerReadyStatus[player.UserId.Value] = true;
             }
             // Keep existing first-player warmup behavior before refreshing the full controller map.
 

@@ -61,64 +61,6 @@ namespace MatchZy
             }
         }
 
-        [ConsoleCommand("css_ready", "Marks the player ready")]
-        public void OnPlayerReady(CCSPlayerController? player, CommandInfo? command)
-        {
-            if (player == null) return;
-            Log($"[!ready command] Sent by: {player.UserId} readyAvailable: {readyAvailable} matchStarted: {matchStarted}");
-            if (readyAvailable && !matchStarted)
-            {
-                if (player.UserId.HasValue)
-                {
-                    if (!playerReadyStatus.ContainsKey(player.UserId.Value))
-                    {
-                        playerReadyStatus[player.UserId.Value] = false;
-                    }
-                    if (playerReadyStatus[player.UserId.Value])
-                    {
-                        // player.PrintToChat($"{chatPrefix} You are already ready!");
-                        PrintToPlayerChat(player, Localizer["matchzy.ready.markedready"]);
-                    }
-                    else
-                    {
-                        playerReadyStatus[player.UserId.Value] = true;
-                        // player.PrintToChat($"{chatPrefix} {Localizer["matchzy.youareready"]}");
-                        PrintToPlayerChat(player, Localizer["matchzy.ready.markedready"]);
-                    }
-                    CheckLiveRequired();
-                    HandleClanTags();
-                }
-            }
-        }
-
-        [ConsoleCommand("css_unready", "Marks the player unready")]
-        [ConsoleCommand("css_notready", "Marks the player unready")]
-        public void OnPlayerUnReady(CCSPlayerController? player, CommandInfo? command)
-        {
-            if (player == null) return;
-            Log($"[!unready command] {player.UserId}");
-            if (readyAvailable && !matchStarted)
-            {
-                if (player.UserId.HasValue)
-                {
-                    if (!playerReadyStatus.ContainsKey(player.UserId.Value))
-                    {
-                        playerReadyStatus[player.UserId.Value] = false;
-                    }
-                    if (!playerReadyStatus[player.UserId.Value])
-                    {
-                        PrintToPlayerChat(player, Localizer["matchzy.ready.markedunready"]);
-                    }
-                    else
-                    {
-                        playerReadyStatus[player.UserId.Value] = false;
-                        PrintToPlayerChat(player, Localizer["matchzy.ready.markedunready"]);
-                    }
-                    HandleClanTags();
-                }
-            }
-        }
-
         [ConsoleCommand("css_stay", "Stays after knife round")]
         public void OnTeamStay(CCSPlayerController? player, CommandInfo? command)
         {
@@ -499,29 +441,22 @@ namespace MatchZy
         [ConsoleCommand("css_forcestart", "Force starts the match")]
         public void OnStartCommand(CCSPlayerController? player, CommandInfo? command)
         {
-            if (IsPlayerAdmin(player, "css_start", "@css/config"))
+            if (isPractice)
             {
-                if (isPractice)
-                {
-                    // ReplyToUserCommand(player, "Cannot start a match while in practice mode. Please use .exitprac command to exit practice mode first!");
-                    ReplyToUserCommand(player, Localizer["matchzy.cc.startisprac"]);
-                    return;
-                }
-                if (matchStarted)
-                {
-                    //ReplyToUserCommand(player, "Start command cannot be used if match is already started! If you want to unpause, please use .unpause");
-                    ReplyToUserCommand(player, Localizer["matchzy.cc.startmatchstarted"]);
-                }
-                else
-                {
-                    //Server.PrintToChatAll($"{chatPrefix} {ChatColors.Green}Admin{ChatColors.Default} has started the game!");
-                    PrintToAllChat(Localizer["matchzy.cc.gamestarted"]);
-                    HandleMatchStart();
-                }
+                // ReplyToUserCommand(player, "Cannot start a match while in practice mode. Please use .exitprac command to exit practice mode first!");
+                ReplyToUserCommand(player, Localizer["matchzy.cc.startisprac"]);
+                return;
+            }
+            if (matchStarted)
+            {
+                //ReplyToUserCommand(player, "Start command cannot be used if match is already started! If you want to unpause, please use .unpause");
+                ReplyToUserCommand(player, Localizer["matchzy.cc.startmatchstarted"]);
             }
             else
             {
-                SendPlayerNotAdminMessage(player);
+                //Server.PrintToChatAll($"{chatPrefix} {ChatColors.Green}Admin{ChatColors.Default} has started the game!");
+                PrintToAllChat(Localizer["matchzy.cc.gamestarted"]);
+                HandleMatchStart();
             }
         }
 

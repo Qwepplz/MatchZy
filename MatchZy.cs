@@ -57,7 +57,6 @@ namespace MatchZy
         private Dictionary<string, string> loadedAdmins = new Dictionary<string, string>();
 
         // Timers
-        public CounterStrikeSharp.API.Modules.Timers.Timer? unreadyPlayerMessageTimer = null;
         public CounterStrikeSharp.API.Modules.Timers.Timer? sideSelectionMessageTimer = null;
         public CounterStrikeSharp.API.Modules.Timers.Timer? pausedStateTimer = null;
 
@@ -105,12 +104,6 @@ namespace MatchZy
             }
 
             commandActions = new Dictionary<string, Action<CCSPlayerController?, CommandInfo?>> {
-                { ".ready", OnPlayerReady },
-                { ".r", OnPlayerReady },
-                { ".forceready", OnForceReadyCommandCommand },
-                { ".unready", OnPlayerUnReady },
-                { ".notready", OnPlayerUnReady },
-                { ".ur", OnPlayerUnReady },
                 { ".stay", OnTeamStay },
                 { ".switch", OnTeamSwitch },
                 { ".swap", OnTeamSwitch },

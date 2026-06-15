@@ -19,6 +19,9 @@ namespace MatchZy
 
         public bool matchModeOnly = false;
 
+        // Locks pug teams after .start so players cannot switch sides or join spectator.
+        public bool arePugTeamsLocked = false;
+
         public bool resetCvarsOnSeriesEnd = true;
 
         public string loadedConfigFile = "";

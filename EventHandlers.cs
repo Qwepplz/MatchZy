@@ -24,7 +24,7 @@ public partial class MatchZy
                 bool kicked = HandlePlayerWhitelist(player, steamId.ToString());
                 if (kicked) return HookResult.Continue;
 
-                if (isMatchSetup || matchModeOnly)
+                if (isMatchSetup || matchModeOnly || arePugTeamsLocked)
                 {
                     CsTeam team = GetPlayerTeam(player);
                     if (team == CsTeam.None)
@@ -105,7 +105,6 @@ public partial class MatchZy
             lastGrenadesData.Remove(userId);
             nadeSpecificLastGrenadeData.Remove(userId);
 
-            EnforceMatchPlayerLimit();
             if (isPaused && pauseTeamName != "Admin")
             {
                 TryUnpauseIfAllHumanPlayersVoted();

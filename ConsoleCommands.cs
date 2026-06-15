@@ -456,6 +456,11 @@ namespace MatchZy
             {
                 //Server.PrintToChatAll($"{chatPrefix} {ChatColors.Green}Admin{ChatColors.Default} has started the game!");
                 PrintToAllChat(Localizer["matchzy.cc.gamestarted"]);
+                if (!isMatchSetup)
+                {
+                    // Manual pug: settle both sides to 5 and lock rosters before starting.
+                    SettleAndLockPugTeams();
+                }
                 HandleMatchStart();
             }
         }

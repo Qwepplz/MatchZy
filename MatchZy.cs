@@ -231,18 +231,11 @@ namespace MatchZy
                     return HookResult.Continue;
                 }
 
-                if (isMatchSetup || isVeto)
+                if (isMatchSetup || isVeto || arePugTeamsLocked)
                 {
                     // Locked teams: force the player back to their assigned side.
                     CsTeam playerTeam = GetPlayerTeam(player);
                     SwitchPlayerTeam(player, playerTeam);
-                    return HookResult.Continue;
-                }
-
-                // Pug/warmup: humans pick freely, rebalance bots to keep each team filled.
-                if (!isPractice && !isSleep)
-                {
-                    Server.NextFrame(EnforceMatchPlayerLimit);
                 }
 
                 return HookResult.Continue;
@@ -252,7 +245,7 @@ namespace MatchZy
             {
                 if (player == null || !player.IsValid || player.IsBot || player.IsHLTV) return HookResult.Continue;
 
-                if (isMatchSetup || isVeto) {
+                if (isMatchSetup || isVeto || arePugTeamsLocked) {
                     if (int.TryParse(info.ArgByIndex(1), out int joiningTeam)) {
                         int playerTeam = (int)GetPlayerTeam(player);
                         if (joiningTeam != playerTeam) {
@@ -262,18 +255,6 @@ namespace MatchZy
                     return HookResult.Continue;
                 }
 
-                // Pug/warmup: block joining a team that already has the max humans.
-                if (!isPractice && !isSleep) {
-                    if (int.TryParse(info.ArgByIndex(1), out int joiningTeam)) {
-                        if ((joiningTeam == (int)CsTeam.Terrorist || joiningTeam == (int)CsTeam.CounterTerrorist)
-                            && player.TeamNum != joiningTeam
-                            && CountHumansOnTeam(joiningTeam) >= targetPlayersPerTeam)
-                        {
-                            PrintToPlayerChat(player, $"This team is full ({targetPlayersPerTeam} players).");
-                            return HookResult.Stop;
-                        }
-                    }
-                }
                 return HookResult.Continue;
             });
 

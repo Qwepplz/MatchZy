@@ -22,7 +22,6 @@ namespace MatchZy
         public const string liveCfgPath = "MatchZy/live.cfg";
         public const string liveWingmanCfgPath = "MatchZy/live_wingman.cfg";
         private const int targetPlayersPerTeam = 5;
-        private bool botBalanceInProgress = false;
 
         private void PrintToAllChat(string message)
         {
@@ -177,85 +176,91 @@ namespace MatchZy
             return MatchPlayerSlotLimiter.GetHumanPlayerCount(GetTrackedMatchPlayerSlots());
         }
 
-        private int CountHumansOnTeam(int teamNum)
+        // Called once from .start: place humans up to targetPlayersPerTeam per side
+        // (overflow goes to the other side, then spectator), fill the rest with bots, and
+        // lock the rosters. After this, teamPlayers + teamSides drive GetPlayerTeam, so the
+        // lock survives knife switches and halftime exactly like a config-loaded match.
+        private void SettleAndLockPugTeams()
         {
-            int count = 0;
-            foreach (var player in playerData.Values)
-            {
-                if (player == null || !player.IsValid) continue;
-                if (IsAutomatedMatchPlayer(player)) continue;
-                if (player.Connected != PlayerConnectedState.PlayerConnected) continue;
-                if (player.TeamNum == teamNum) count++;
-            }
-            return count;
-        }
-
-        private List<int> GetBotUserIdsOnTeam(int teamNum)
-        {
-            List<int> ids = new();
+            List<CCSPlayerController> ctHumans = new();
+            List<CCSPlayerController> tHumans = new();
+            List<int> existingBotIds = new();
             foreach (var kv in playerData)
             {
-                CCSPlayerController? player = kv.Value;
-                if (player == null || !player.IsValid) continue;
-                if (!IsAutomatedMatchPlayer(player)) continue;
-                if (player.TeamNum == teamNum) ids.Add(kv.Key);
+                CCSPlayerController? p = kv.Value;
+                if (p == null || !p.IsValid) continue;
+                if (IsAutomatedMatchPlayer(p))
+                {
+                    existingBotIds.Add(kv.Key);
+                    continue;
+                }
+                if (p.Connected != PlayerConnectedState.PlayerConnected) continue;
+                if (p.TeamNum == (int)CsTeam.CounterTerrorist) ctHumans.Add(p);
+                else if (p.TeamNum == (int)CsTeam.Terrorist) tHumans.Add(p);
             }
-            return ids;
-        }
+            // Earliest joiner first, so the latest joiners are the ones moved off a full team.
+            ctHumans.Sort((a, b) => (a.UserId ?? 0).CompareTo(b.UserId ?? 0));
+            tHumans.Sort((a, b) => (a.UserId ?? 0).CompareTo(b.UserId ?? 0));
 
-        // Keeps each team at targetPlayersPerTeam by filling empty slots with bots:
-        // bots per team = max(0, target - humans on that team). Humans replace bots on the
-        // team they join; switching/leaving rebalances both sides.
-        private void EnforceMatchPlayerLimit()
-        {
-            if (isPractice || isSleep) return;
-            if (botBalanceInProgress) return;
-
-            botBalanceInProgress = true;
-
-            int totalDesiredBots = 0;
-            // CsTeam.Terrorist = 2, CsTeam.CounterTerrorist = 3
-            foreach (int teamNum in new[] { (int)CsTeam.Terrorist, (int)CsTeam.CounterTerrorist })
+            List<CCSPlayerController> specHumans = new();
+            while (ctHumans.Count > targetPlayersPerTeam)
             {
-                int humans = CountHumansOnTeam(teamNum);
-                int desiredBots = Math.Max(0, targetPlayersPerTeam - humans);
-                totalDesiredBots += desiredBots;
-
-                List<int> botIds = GetBotUserIdsOnTeam(teamNum);
-                int diff = botIds.Count - desiredBots;
-
-                if (diff > 0)
+                CCSPlayerController moved = ctHumans[^1];
+                ctHumans.RemoveAt(ctHumans.Count - 1);
+                if (tHumans.Count < targetPlayersPerTeam)
                 {
-                    // Too many bots on this team: kick the excess.
-                    foreach (int userId in botIds.OrderByDescending(id => id).Take(diff))
-                    {
-                        if (!playerData.TryGetValue(userId, out CCSPlayerController? bot)) continue;
-                        Log($"[EnforceMatchPlayerLimit] Kicking bot {bot.PlayerName} ({userId}) from team {teamNum} to keep {targetPlayersPerTeam} per team.");
-                        Server.ExecuteCommand($"kickid {(ushort)userId}");
-                        playerData.Remove(userId);
-                        playerReadyStatus.Remove(userId);
-                    }
+                    tHumans.Add(moved);
+                    SwitchPlayerTeam(moved, CsTeam.Terrorist);
                 }
-                else if (diff < 0)
+                else
                 {
-                    // Too few bots on this team: add to fill the empty slots.
-                    string addCommand = teamNum == (int)CsTeam.Terrorist ? "bot_add_t" : "bot_add_ct";
-                    for (int i = 0; i < -diff; i++)
-                    {
-                        Log($"[EnforceMatchPlayerLimit] Adding bot to team {teamNum} ({addCommand}) to reach {targetPlayersPerTeam} per team.");
-                        Server.ExecuteCommand(addCommand);
-                    }
+                    specHumans.Add(moved);
+                    SwitchPlayerTeam(moved, CsTeam.Spectator);
+                }
+            }
+            while (tHumans.Count > targetPlayersPerTeam)
+            {
+                CCSPlayerController moved = tHumans[^1];
+                tHumans.RemoveAt(tHumans.Count - 1);
+                if (ctHumans.Count < targetPlayersPerTeam)
+                {
+                    ctHumans.Add(moved);
+                    SwitchPlayerTeam(moved, CsTeam.CounterTerrorist);
+                }
+                else
+                {
+                    specHumans.Add(moved);
+                    SwitchPlayerTeam(moved, CsTeam.Spectator);
                 }
             }
 
-            // Cap the global quota at the total we want so the engine never spawns extra bots.
-            Server.ExecuteCommand($"bot_quota {totalDesiredBots}");
+            JObject ctRoster = new();
+            foreach (var p in ctHumans) ctRoster[p.SteamID.ToString()] = p.PlayerName;
+            JObject tRoster = new();
+            foreach (var p in tHumans) tRoster[p.SteamID.ToString()] = p.PlayerName;
+            JObject specRoster = new();
+            foreach (var p in specHumans) specRoster[p.SteamID.ToString()] = p.PlayerName;
 
-            connectedPlayers = playerData.Count;
+            reverseTeamSides["CT"].teamPlayers = ctRoster;
+            reverseTeamSides["TERRORIST"].teamPlayers = tRoster;
+            matchConfig.Spectators = specRoster;
 
-            // Bot adds connect asynchronously and re-trigger this path; release the guard
-            // shortly after so the next genuine roster change can rebalance.
-            AddTimer(0.5f, () => botBalanceInProgress = false);
+            // Clear existing bots so we can refill each side to exactly targetPlayersPerTeam.
+            foreach (int botId in existingBotIds)
+            {
+                Server.ExecuteCommand($"kickid {(ushort)botId}");
+                playerData.Remove(botId);
+                playerReadyStatus.Remove(botId);
+            }
+
+            int ctBots = targetPlayersPerTeam - ctHumans.Count;
+            int tBots = targetPlayersPerTeam - tHumans.Count;
+            for (int i = 0; i < ctBots; i++) Server.ExecuteCommand("bot_add_ct");
+            for (int i = 0; i < tBots; i++) Server.ExecuteCommand("bot_add_t");
+            Server.ExecuteCommand($"bot_quota {ctBots + tBots}");
+
+            Log($"[SettleAndLockPugTeams] CT humans: {ctHumans.Count}, T humans: {tHumans.Count}, spectators: {specHumans.Count}, cleared bots: {existingBotIds.Count}, bots added CT/T: {ctBots}/{tBots}");
+            arePugTeamsLocked = true;
         }
 
         private bool ShouldTrackPlayer(CCSPlayerController player)
@@ -403,9 +408,6 @@ namespace MatchZy
         {
             isWarmup = true;
             ExecWarmupCfg();
-            // Fill both teams to targetPlayersPerTeam once the warmup cfg has applied.
-            // Covers empty/bot-only servers and map loads where no human connect event fires.
-            AddTimer(1.0f, EnforceMatchPlayerLimit);
         }
 
         private void StartKnifeRound()
@@ -565,6 +567,7 @@ namespace MatchZy
                 readyAvailable = true;
                 isPaused = false;
                 isMatchSetup = false;
+                arePugTeamsLocked = false;
 
                 isWarmup = true;
                 isKnifeRound = false;
@@ -707,7 +710,6 @@ namespace MatchZy
                         playerReadyStatus.Remove(key);
                     }
                 }
-                EnforceMatchPlayerLimit();
                 Log($"[UpdatePlayersMap] CCSPlayerController count: {playerEntities.Count<CCSPlayerController>()}, RealPlayersCount: {GetRealPlayersCount()}");
                 if (!mapChangePending)
                 {

@@ -442,7 +442,6 @@ namespace MatchZy
             isWarmup = true;
             ExecWarmupCfg();
             knifeWinnerName = knifeWinner == 3 ? reverseTeamSides["CT"].teamName : reverseTeamSides["TERRORIST"].teamName;
-            ShowDamageInfo();
             if (ShouldAutoResolveKnifeSideSelection())
             {
                 HandleKnifeStayDecision();
@@ -1192,7 +1191,6 @@ namespace MatchZy
             playerHasTakenDamage = false;
             HandleCoaches();
             CreateMatchZyRoundDataBackup();
-            InitPlayerDamageInfo();
             UpdateHostname();
         }
 
@@ -1206,8 +1204,6 @@ namespace MatchZy
                     coachKillTimer = null;
                     (int t1score, int t2score) = GetTeamsScore();
                     Server.PrintToChatAll($"{chatPrefix} {ChatColors.Green}{matchzyTeam1.teamName} [{t1score} - {t2score}] {matchzyTeam2.teamName}");
-
-                    ShowDamageInfo();
 
                     (Dictionary<ulong, Dictionary<string, object>> playerStatsDictionary, List<StatsPlayer> playerStatsListTeam1, List<StatsPlayer> playerStatsListTeam2) = GetPlayerStatsDict();
 

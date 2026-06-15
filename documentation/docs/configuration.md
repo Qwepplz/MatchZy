@@ -145,9 +145,6 @@ Example: `matchzy_demo_upload_url "https://your-website.com/upload-endpoint"` <b
 ####`matchzy_remote_backup_header_value`
 :   If this and matchzy_remote_backup_header_key are defined, this header name and value will be used for your backup upload HTTP request. **`Default: ""`**
 
-####`matchzy_enable_damage_report`
-:   Whether to show damage report after each round or not. **`Default: "true"`**
-
 ####`matchzy_addplayer <steam64> <team1|team2|spec> [name]`
 :   Adds a Steam64 to the provided team. The name parameter locks the player's name.
 

@@ -357,11 +357,9 @@ namespace MatchZy
 
 				if (!attacker!.IsValid || attacker.IsBot && !(@event.DmgHealth > 0 || @event.DmgArmor > 0))
 					return HookResult.Continue;
-                if (matchStarted && victim!.TeamNum != attacker.TeamNum) 
+                if (matchStarted && victim!.TeamNum != attacker.TeamNum)
                 {
-                    int targetId = (int)victim.UserId!;
-                    UpdatePlayerDamageInfo(@event, targetId);
-                    if (attacker != victim) playerHasTakenDamage = true;
+                    playerHasTakenDamage = true;
                 }
 
 				return HookResult.Continue;

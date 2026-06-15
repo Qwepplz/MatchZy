@@ -237,6 +237,27 @@ namespace MatchZy
                     CsTeam playerTeam = GetPlayerTeam(player);
                     SwitchPlayerTeam(player, playerTeam);
                 }
+                else if (isWarmup && !matchStarted)
+                {
+                    // Pre-match warmup: lock each human to the first side they pick.
+                    ulong steamId = player.SteamID;
+                    int newTeam = @event.Team;
+                    if (newTeam == (int)CsTeam.Terrorist || newTeam == (int)CsTeam.CounterTerrorist)
+                    {
+                        if (warmupTeamLock.TryGetValue(steamId, out CsTeam lockedTeam))
+                        {
+                            if (newTeam != (int)lockedTeam) SwitchPlayerTeam(player, lockedTeam);
+                        }
+                        else
+                        {
+                            warmupTeamLock[steamId] = (CsTeam)newTeam;
+                        }
+                    }
+                    else if (warmupTeamLock.TryGetValue(steamId, out CsTeam lockedTeam))
+                    {
+                        SwitchPlayerTeam(player, lockedTeam);
+                    }
+                }
 
                 return HookResult.Continue;
             });
@@ -249,6 +270,14 @@ namespace MatchZy
                     if (int.TryParse(info.ArgByIndex(1), out int joiningTeam)) {
                         int playerTeam = (int)GetPlayerTeam(player);
                         if (joiningTeam != playerTeam) {
+                            return HookResult.Stop;
+                        }
+                    }
+                    return HookResult.Continue;
+                }
+                else if (isWarmup && !matchStarted) {
+                    if (warmupTeamLock.TryGetValue(player.SteamID, out CsTeam lockedTeam)) {
+                        if (int.TryParse(info.ArgByIndex(1), out int joiningTeam) && joiningTeam != (int)lockedTeam) {
                             return HookResult.Stop;
                         }
                     }

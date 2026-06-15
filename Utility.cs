@@ -408,6 +408,11 @@ namespace MatchZy
         {
             isWarmup = true;
             ExecWarmupCfg();
+            warmupTeamLock.Clear();
+            if (!isMatchSetup)
+            {
+                Server.ExecuteCommand("bot_quota 0; bot_kick");
+            }
         }
 
         private void StartKnifeRound()

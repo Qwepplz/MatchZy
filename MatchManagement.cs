@@ -22,6 +22,9 @@ namespace MatchZy
         // Locks pug teams after .start so players cannot switch sides or join spectator.
         public bool arePugTeamsLocked = false;
 
+        // Locks each human to the side they first pick during pre-match warmup.
+        public Dictionary<ulong, CsTeam> warmupTeamLock = new();
+
         public bool resetCvarsOnSeriesEnd = true;
 
         public string loadedConfigFile = "";

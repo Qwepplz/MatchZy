@@ -222,8 +222,6 @@ namespace MatchZy
 
             RegisterEventHandler<EventPlayerTeam>((@event, info) =>
             {
-                if (!isMatchSetup && !isVeto) return HookResult.Continue;
-
                 CCSPlayerController? player = @event.Userid;
 
                 if (!IsPlayerValid(player)) return HookResult.Continue;
@@ -233,19 +231,45 @@ namespace MatchZy
                     return HookResult.Continue;
                 }
 
-                CsTeam playerTeam = GetPlayerTeam(player);
+                if (isMatchSetup || isVeto)
+                {
+                    // Locked teams: force the player back to their assigned side.
+                    CsTeam playerTeam = GetPlayerTeam(player);
+                    SwitchPlayerTeam(player, playerTeam);
+                    return HookResult.Continue;
+                }
 
-                SwitchPlayerTeam(player, playerTeam);
+                // Pug/warmup: humans pick freely, rebalance bots to keep each team filled.
+                if (!isPractice && !isSleep)
+                {
+                    Server.NextFrame(EnforceMatchPlayerLimit);
+                }
 
                 return HookResult.Continue;
             });
 
             AddCommandListener("jointeam", (player, info) =>
             {
-                if ((isMatchSetup || isVeto) && player != null && player.IsValid && !player.IsBot && !player.IsHLTV) {
+                if (player == null || !player.IsValid || player.IsBot || player.IsHLTV) return HookResult.Continue;
+
+                if (isMatchSetup || isVeto) {
                     if (int.TryParse(info.ArgByIndex(1), out int joiningTeam)) {
                         int playerTeam = (int)GetPlayerTeam(player);
                         if (joiningTeam != playerTeam) {
+                            return HookResult.Stop;
+                        }
+                    }
+                    return HookResult.Continue;
+                }
+
+                // Pug/warmup: block joining a team that already has the max humans.
+                if (!isPractice && !isSleep) {
+                    if (int.TryParse(info.ArgByIndex(1), out int joiningTeam)) {
+                        if ((joiningTeam == (int)CsTeam.Terrorist || joiningTeam == (int)CsTeam.CounterTerrorist)
+                            && player.TeamNum != joiningTeam
+                            && CountHumansOnTeam(joiningTeam) >= targetPlayersPerTeam)
+                        {
+                            PrintToPlayerChat(player, $"This team is full ({targetPlayersPerTeam} players).");
                             return HookResult.Stop;
                         }
                     }

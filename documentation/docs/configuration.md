@@ -56,15 +56,6 @@ Again, inside `csgo/cfg/MatchZy`, a file named `config.cfg` should be present. T
 ####`matchzy_minimum_ready_required`
 :   Minimum ready players required to start the match. If set to 0, all connected players have to ready-up to start the match.<br>**`Default: 2`**
 
-####`matchzy_stop_command_available`
-:   Whether !stop/.stop command to restore the backup of the current round is enabled by default or not.<br>**`Default: false`**
-
-####`matchzy_stop_command_no_damage`
-:   Whether the stop command becomes unavailable if a player damages a player from the opposing team.<br>**`Default: false`**
-
-####`matchzy_pause_after_restore`
-:   Whether to pause the match after round restore or not. Players can unpause the match using !unpause/.unpause. (Both the teams will have to use unpause command) or admins can use `.fup` to force-unpause the game<br>**`Default: true`**
-
 ####`matchzy_whitelist_enabled_default`
 :   Whether [whitelist](#whitelisting-players) is enabled by default or not. This is the default value, but whitelist can be toggled by admin using ``.whitelist`` command<br>**`Default: false`**
 
@@ -129,21 +120,6 @@ Example: `matchzy_demo_upload_url "https://your-website.com/upload-endpoint"` <b
 ####`matchzy_match_start_message`
 :   Message to show when the match starts. Use $$$ to break message into multiple lines. Set to "" to disable. Available Colors: {Default}, {Darkred}, {Green}, {LightYellow}, {LightBlue}, {Olive}, {Lime}, {Red}, {Purple}, {Grey}, {Yellow}, {Gold}, {Silver}, {Blue}, {DarkBlue}. Example usage: matchzy_match_start_message {Green} Welcome to the server! {Default} $$$ Agent models are not allowed and may lead to {Red}disqualification!{Default}
 <br>**`Default: ""`**
-
-####`matchzy_loadbackup`
-:   Loads a match backup from the given file. Relative to `csgo/MatchZyDataBackup/`.
-
-####`matchzy_loadbackup_url`
-:   Loads a match backup from a remote host by sending an HTTP(S) GET to the given URL. You may optionally provide an HTTP header and value pair using the header name and header value arguments. You should put all arguments inside quotation marks ("").
-
-####`matchzy_remote_backup_url`
-:   If defined, MatchZy will automatically send backups to this URL in an HTTP POST request. If no protocol is provided, http:// will be prepended to this value. Requires the SteamWorks extension. 
-
-####`matchzy_remote_backup_header_key`
-:   If this and matchzy_remote_backup_header_value are defined, this header name and value will be used for your backup upload HTTP request. **`Default: "Authorization"`**
-
-####`matchzy_remote_backup_header_value`
-:   If this and matchzy_remote_backup_header_key are defined, this header name and value will be used for your backup upload HTTP request. **`Default: ""`**
 
 ####`matchzy_addplayer <steam64> <team1|team2|spec> [name]`
 :   Adds a Steam64 to the provided team. The name parameter locks the player's name.

@@ -72,8 +72,6 @@ namespace MatchZy
 
         public bool isPlayOutEnabled = false;
 
-        public bool playerHasTakenDamage = false;
-
         // User command - action map
         public Dictionary<string, Action<CCSPlayerController?, CommandInfo?>>? commandActions;
 
@@ -158,9 +156,7 @@ namespace MatchZy
                 { ".fastforward", OnFastForwardCommand },
                 { ".clear", OnClearCommand },
                 { ".match", OnMatchCommand },
-                { ".uncoach", OnUnCoachCommand },
                 { ".exitprac", OnMatchCommand },
-                { ".stop", OnStopCommand },
                 { ".help", OnHelpCommand },
                 { ".t", OnTCommand },
                 { ".ct", OnCTCommand },
@@ -200,25 +196,12 @@ namespace MatchZy
             RegisterEventHandler<EventCsWinPanelRound>(EventCsWinPanelRoundHandler, hookMode: HookMode.Pre);
             RegisterEventHandler<EventCsWinPanelMatch>(EventCsWinPanelMatchHandler);
             RegisterEventHandler<EventRoundStart>(EventRoundStartHandler);
-            RegisterEventHandler<EventRoundFreezeEnd>(EventRoundFreezeEndHandler);
-            RegisterEventHandler<EventPlayerGivenC4>(EventPlayerGivenC4);
-            RegisterEventHandler<EventPlayerDeath>(EventPlayerDeathPreHandler, hookMode: HookMode.Pre);
-            RegisterListener<Listeners.OnClientDisconnectPost>(playerSlot => { 
+            RegisterListener<Listeners.OnClientDisconnectPost>(playerSlot => {
                // May not be required, but just to be on safe side so that player data is properly updated in dictionaries
                // Update: Commenting the below function as it was being called multiple times on map change.
                 // UpdatePlayersMap();
             });
             RegisterListener<Listeners.OnEntitySpawned>(OnEntitySpawnedHandler);
-            RegisterEventHandler<EventPlayerTeam>((@event, info) => {
-                CCSPlayerController? player = @event.Userid;
-                if (!IsPlayerValid(player)) return HookResult.Continue;
-
-                if (matchzyTeam1.coach.Contains(player!) || matchzyTeam2.coach.Contains(player!)) {
-                    @event.Silent = true;
-                    return HookResult.Changed;
-                }
-                return HookResult.Continue;
-            }, HookMode.Pre);
 
             RegisterEventHandler<EventPlayerTeam>((@event, info) =>
             {
@@ -382,13 +365,6 @@ namespace MatchZy
                     return HookResult.Continue;
                 }
 
-				if (!attacker!.IsValid || attacker.IsBot && !(@event.DmgHealth > 0 || @event.DmgArmor > 0))
-					return HookResult.Continue;
-                if (matchStarted && victim!.TeamNum != attacker.TeamNum)
-                {
-                    playerHasTakenDamage = true;
-                }
-
 				return HookResult.Continue;
 			});
 
@@ -430,10 +406,6 @@ namespace MatchZy
                     HandleReadyRequiredCommand(player, messageCommandArg);
                 }
 
-                if (message.StartsWith(".restore"))
-                {
-                    HandleRestoreCommand(player, messageCommandArg);
-                }
                 if (message.StartsWith(".asay"))
                 {
                     if (IsPlayerAdmin(player, "css_asay", "@css/chat"))
@@ -508,10 +480,6 @@ namespace MatchZy
                     {
                         SendPlayerNotAdminMessage(player);
                     }
-                }
-                if (message.StartsWith(".coach"))
-                {
-                    HandleCoachCommand(player, messageCommandArg);
                 }
                 if (message.StartsWith(".ban"))
                 {

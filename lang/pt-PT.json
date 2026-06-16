@@ -22,20 +22,6 @@
   "matchzy.pause.matchended": "Não podes usar este comando depois da partida ter terminado.",
   "matchzy.pause.tacticaltimeout": "Não podes usar este comando enquanto uma pausa tática encontra-se ativa.",
 
-  "matchzy.restore.teamwantstorestore": "{green}{0}{default} quer reinicar para o início desta ronda. {green}{1}{default}, escreva !stop para confirmar.",
-  "matchzy.restore.loadedsuccessfully": "Ficheiro backup carregado com sucesso: {0}",
-  "matchzy.restore.restoredsuccessfully": "Ficheiro Backup restaurado com sucesso: {0}",
-  "matchzy.restore.stopcommandrequiresnodamage": "Um pedido para reiniciar a ronda não pode ser realizado a partir do momento que um jogador atacou um adversário.",
-
-  "matchzy.backup.stopduringhalftime": "Não podes usar este comando durante um intervalo.",
-  "matchzy.backup.stopmatchended": "Não podes usar este comando depois da partida ter terminado.",
-  "matchzy.backup.stoptacticaltimeout": "Não podes usar este comando enquanto uma pausa tática encontra-se ativa.",
-  "matchzy.backup.restoreinvalidvalue": "Valor inválido para comando \"restore\". Por favor, especifica um número não negativo e váldio. Uso: !restore <ronda>",
-  "matchzy.backup.restoreduringhalftime": "Não podes carregar um backup durante um intervalo.",
-  "matchzy.backup.restorematchended": "Não podes usar este comando depois da partida ter terminado.",
-  "matchzy.backup.restoretacticaltimeout": "Não podes usar este comando enquanto uma pausa tática encontra-se ativa.",
-  "matchzy.backup.restoredoesntexist": "Ficheiro Backup {0} não existe, por favor assegura-te que estás a restaurar um backup válido.",
-
   "matchzy.cvars.invalidvalue": "Valor inválido para matchzy_chat_messages_timer_delay. Por favor, especifica um número não-negativo e válido.",
 
   "matchzy.cc.enabled": "{green}Ativo{default}",

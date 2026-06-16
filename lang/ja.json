@@ -22,20 +22,6 @@
   "matchzy.pause.matchended": "ゲーム終了後はこのコマンドは使用できません。",
   "matchzy.pause.tacticaltimeout": "テクニカルポーズがアクティブな場合、このコマンドは使用できません。",
 
-  "matchzy.restore.teamwantstorestore": "{green}{0}{default} ゲームを現在のラウンドの始めに戻します。 {green}{1}{default}, 確認するには !stop と入力してください。",
-  "matchzy.restore.loadedsuccessfully": "Backup file loaded successfully: {0}",
-  "matchzy.restore.restoredsuccessfully": "バックアップファイルが正常に復元されました: {0}",
-  "matchzy.restore.stopcommandrequiresnodamage": "A request to restart the round cannot be given once a player has damaged any opposing player.",
-
-  "matchzy.backup.stopduringhalftime": "ハーフタイム中はこのコマンドは使用できません。",
-  "matchzy.backup.stopmatchended": "ゲーム終了後はこのコマンドは使用できません。",
-  "matchzy.backup.stoptacticaltimeout": "テクニカルポーズがアクティブな場合、このコマンドは使用できません。",
-  "matchzy.backup.restoreinvalidvalue": "復元コマンドの値が無効です。有効な負でない数値を指定してください。使用法: !restore <round>",
-  "matchzy.backup.restoreduringhalftime": "ハーフタイム中にバックアップをロードすることはできません。",
-  "matchzy.backup.restorematchended": "ゲーム終了後はこのコマンドは使用できません。",
-  "matchzy.backup.restoretacticaltimeout": "テクニカルポーズがアクティブな場合、このコマンドは使用できません。",
-  "matchzy.backup.restoredoesntexist": "バックアップ ファイル {0} が存在しません。有効なバックアップを復元していることを確認してください。",
-
   "matchzy.cvars.invalidvalue": "matchzy_chat_messages_timer_delay の値が無効です。有効な負でない数値を指定してください。",
 
   "matchzy.cc.enabled": "{green}有効{default}",

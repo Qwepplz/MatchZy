@@ -89,18 +89,6 @@ public partial class MatchZy
             }
             playerData.Remove(userId);
 
-            if (matchzyTeam1.coach.Contains(player))
-            {
-                matchzyTeam1.coach.Remove(player);
-                SetPlayerVisible(player);
-                player.Clan = "";
-            }
-            else if (matchzyTeam2.coach.Contains(player))
-            {
-                matchzyTeam2.coach.Remove(player);
-                SetPlayerVisible(player);
-                player.Clan = "";
-            }
             noFlashList.Remove(userId);
             lastGrenadesData.Remove(userId);
             nadeSpecificLastGrenadeData.Remove(userId);
@@ -158,55 +146,6 @@ public partial class MatchZy
             Log($"[EventRoundStart FATAL] An error occurred: {e.Message}");
             return HookResult.Continue;
         }
-    }
-
-    public HookResult EventRoundFreezeEndHandler(EventRoundFreezeEnd @event, GameEventInfo info)
-    {
-        try
-        {
-            if (!matchStarted) return HookResult.Continue;
-            HashSet<CCSPlayerController> coaches = GetAllCoaches();
-
-            foreach (var coach in coaches)
-            {
-                if (!IsPlayerValid(coach)) continue;
-                // If coaches are still left alive after freezetime ends, this code will force them to spectate their team again.
-                if (coach.PlayerPawn.Value?.LifeState != (byte)LifeState_t.LIFE_ALIVE) continue;
-
-                Position coachPosition = new(coach.PlayerPawn.Value!.CBodyComponent!.SceneNode!.AbsOrigin, coach.PlayerPawn.Value!.CBodyComponent!.SceneNode!.AbsRotation);
-                coach!.PlayerPawn.Value!.Teleport(new Vector(coachPosition.PlayerPosition.X, coachPosition.PlayerPosition.Y, coachPosition.PlayerPosition.Z + 20.0f), coachPosition.PlayerAngle, new Vector(0, 0, 0));
-                AddTimer(1.5f, () =>
-                {
-                    coach!.PlayerPawn.Value!.Teleport(new Vector(coachPosition.PlayerPosition.X, coachPosition.PlayerPosition.Y, coachPosition.PlayerPosition.Z + 20.0f), coachPosition.PlayerAngle, new Vector(0, 0, 0));
-                    CsTeam oldTeam = GetCoachTeam(coach);
-                    coach.ChangeTeam(CsTeam.Spectator);
-                    AddTimer(0.01f, () => coach.ChangeTeam(oldTeam));
-                });
-            }
-            return HookResult.Continue;
-        }
-        catch (Exception e)
-        {
-            Log($"[EventRoundFreezeEnd FATAL] An error occurred: {e.Message}");
-            return HookResult.Continue;
-        }
-    }
-
-    public HookResult EventPlayerGivenC4(EventPlayerGivenC4 @event, GameEventInfo info) {
-        try {
-            if (!matchStarted) return HookResult.Continue;
-            if (@event.Userid == null) return HookResult.Continue;
-            var recv = @event.Userid;
-
-            // check if coach
-            var coaches = reverseTeamSides["TERRORIST"].coach;
-            if (coaches.Contains(recv)) {
-                TransferCoachBomb(recv);
-            }
-        } catch (Exception e) {
-            Log($"[EventPlayerGivenC4 FATAL] An error occured: {e.Message}");
-        }
-        return HookResult.Continue;
     }
 
     public void OnEntitySpawnedHandler(CEntityInstance entity)
@@ -276,29 +215,6 @@ public partial class MatchZy
         catch (Exception e)
         {
             Log($"[OnEntitySpawnedHandler FATAL] An error occurred: {e.Message}");
-        }
-    }
-
-    public HookResult EventPlayerDeathPreHandler(EventPlayerDeath @event, GameEventInfo info)
-    {
-        try
-        {
-            // We do not broadcast the suicide of the coach
-            if (!matchStarted) return HookResult.Continue;
-
-            if (@event.Attacker == @event.Userid)
-            {
-                if (matchzyTeam1.coach.Contains(@event.Attacker!) || matchzyTeam2.coach.Contains(@event.Attacker!))
-                {
-                    info.DontBroadcast = true;
-                }
-            }
-            return HookResult.Continue;
-        }
-        catch (Exception e)
-        {
-            Log($"[EventPlayerDeathPreHandler FATAL] An error occurred: {e.Message}");
-            return HookResult.Continue;
         }
     }
 

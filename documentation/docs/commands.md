@@ -9,10 +9,7 @@ Most of the commands can also be used using ! prefix instead of . (like !ready)
 - `.unpause` Request for unpausing the match. Both teams need to type .unpause to unpause the match
 - `.stay` Stays on the same side (For knife winner, after the knife round)
 - `.switch`/`.swap` Switches the side (For knife winner, after the knife round)
-- `.stop` Restore the backup of the current round (Both teams need to type .stop to restore the current round)
 - `.tac` Starts a tactical timeout
-- `.coach <side>` Starts coaching the specified side. Example: `.coach t` to start coaching terrorist side!
-- `.uncoach` Leaves coaching slot
 
 # Practice Mode Commands
 
@@ -67,7 +64,6 @@ Most of the commands can also be used using ! prefix instead of . (like !ready)
 - `.restart` Force restarts/resets a match. (Alias: `.endmatch`, `.forceend`)
 - `.forcepause` Pauses the match as an admin (Players cannot unpause the admin-paused match). (Alias: `.fp`)
 - `.forceunpause` Force unpauses the match. (Alias: `.fup`)
-- `.restore <round>` Restores the backup of provided round number.
 - `.skipveto` / `.sv` Skips the current veto phase.
 - `.roundknife` / `.rk` Toggles the knife round. If disabled, match will directly go from Warmup phase to Live phase.
 - `.playout` Toggles playout (If playout is enabled, all rounds would be played irrespective of winner. Useful in scrims!)

@@ -22,20 +22,6 @@
     "matchzy.pause.matchended": "你不能在比赛结束之后使用此命令.",
     "matchzy.pause.tacticaltimeout": "你不能在战术暂停期间使用此命令.",
                                                             
-    "matchzy.restore.teamwantstorestore": "{green}{0}{default} 想要回溯游戏至本回合开始时。 {green}{1}{default}, 请输入 !stop 来确定。",
-    "matchzy.restore.loadedsuccessfully": "Backup file loaded successfully: {0}",
-    "matchzy.restore.restoredsuccessfully": "成功恢复备份文件: {0}",
-    "matchzy.restore.stopcommandrequiresnodamage": "A request to restart the round cannot be given once a player has damaged any opposing player.",
-
-    "matchzy.backup.stopduringhalftime": "你不能在半场期间使用此命令.",
-    "matchzy.backup.stopmatchended": "你不能在比赛结束后使用此命令.",
-    "matchzy.backup.stoptacticaltimeout": "你不能在战术暂停期间使用此命令.",
-    "matchzy.backup.restoreinvalidvalue": "restore 命令参数不合法. 请输入一个非负的数值. 使用示例: !restore <round>",
-    "matchzy.backup.restoreduringhalftime": "你不能在半场时间载入备份数据.",
-    "matchzy.backup.restorematchended": "你不能在比赛结束后使用此命令.",
-    "matchzy.backup.restoretacticaltimeout": "你不能在战术暂停期间使用此命令.",
-    "matchzy.backup.restoredoesntexist": "备份文件 {0} 不存在, 请确认你正在恢复的是一个有效的备份文件.",
-  
     "matchzy.cvars.invalidvalue": "matchzy_chat_messages_timer_delay 命令的参数不合法. 请输入一个有效的非负数的数值.",
   
     "matchzy.cc.enabled": "{green}已启用{default}",

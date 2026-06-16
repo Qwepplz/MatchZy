@@ -24,8 +24,6 @@ namespace MatchZy
 
         public FakeConVar<string> hostnameFormat = new("matchzy_hostname_format", "The server hostname to use. Set to \"\" to disable/use existing. Default: MatchZy | {TEAM1} vs {TEAM2}", "MatchZy | {TEAM1} vs {TEAM2}");
 
-        public FakeConVar<bool> stopCommandNoDamage = new("matchzy_stop_command_no_damage", "Whether the stop command becomes unavailable if a player damages a player from the opposing team.", false);
-
         public FakeConVar<string> matchStartMessage = new("matchzy_match_start_message", "Message to show when the match starts. Use $$$ to break message into multiple lines. Set to \"\" to disable.", "");
 
         [ConsoleCommand("matchzy_whitelist_enabled_default", "Whether Whitelist is enabled by default or not. Default value: false")]
@@ -147,15 +145,6 @@ namespace MatchZy
             demoUploadURL = url;
         }
 
-        [ConsoleCommand("matchzy_stop_command_available", "Whether .stop command is enabled or not (to restore the current round). Default value: false")]
-        public void MatchZyStopCommandEnabled(CCSPlayerController? player, CommandInfo command)
-        {
-            if (player != null) return;
-            string args = command.ArgString;
-
-            isStopCommandAvailable = bool.TryParse(args, out bool isStopCommandAvailableValue) ? isStopCommandAvailableValue : args != "0" && isStopCommandAvailable;
-        }
-
         [ConsoleCommand("matchzy_use_pause_command_for_tactical_pause", "Whether to use !pause/.pause command for tactical pause or normal pause (unpauses only when both teams use unpause command, for admin force-unpauses the game). Default value: false")]
         public void MatchZyPauseForTacticalCommand(CCSPlayerController? player, CommandInfo command)
         {
@@ -163,15 +152,6 @@ namespace MatchZy
             string args = command.ArgString;
 
             isPauseCommandForTactical = bool.TryParse(args, out bool isPauseCommandForTacticalValue) ? isPauseCommandForTacticalValue : args != "0" && isPauseCommandForTactical;
-        }
-
-        [ConsoleCommand("matchzy_pause_after_restore", "Whether to pause the match after a round is restored using matchzy. Default value: true")]
-        public void MatchZyPauseAfterStopEnabled(CCSPlayerController? player, CommandInfo command)
-        {
-            if (player != null) return;
-            string args = command.ArgString;
-
-            pauseAfterRoundRestore = bool.TryParse(args, out bool pauseAfterRoundRestoreValue) ? pauseAfterRoundRestoreValue : args != "0" && pauseAfterRoundRestore;
         }
 
         [ConsoleCommand("matchzy_chat_prefix", "Default value of chat prefix for MatchZy messages. Default value: [{Green}MatchZy{Default}]")]
@@ -267,44 +247,6 @@ namespace MatchZy
                 // command.ReplyToCommand("Usage: matchzy_max_saved_last_grenades <number>");
                 ReplyToUserCommand(player, Localizer["matchzy.cc.usage", $"matchzy_max_saved_last_grenades <number>"]);
             }
-        }
-
-        [ConsoleCommand("get5_remote_backup_url", "A URL to send backup files to over HTTP. Leave empty to disable.")]
-        [ConsoleCommand("matchzy_remote_backup_url", "A URL to send backup files to over HTTP. Leave empty to disable.")]
-        [CommandHelper(minArgs: 1, usage: "<remote_backup_upload_url>")]
-        public void MatchZyBackupUploadURL(CCSPlayerController? player, CommandInfo command)
-        {
-            if (player != null) return;
-            string url = command.ArgByIndex(1);
-            if (url.Trim() == "") return;
-            if (!IsValidUrl(url))
-            {
-                Log($"[MatchZyBackupUploadURL] Invalid URL: {url}. Please provide a valid URL for uploading the backup!");
-                return;
-            }
-            backupUploadURL = url;
-        }
-
-        [ConsoleCommand("get5_remote_backup_header_key", "If defined, a custom HTTP header with this name is added to the backup HTTP request.")]
-        [ConsoleCommand("matchzy_remote_backup_header_key", "If defined, a custom HTTP header with this name is added to the backup HTTP request.")]
-        [CommandHelper(minArgs: 1, usage: "<remote_backup_header_key>")]
-        public void BackupUploadHeaderKeyCommand(CCSPlayerController? player, CommandInfo command)
-        {
-            if (player != null) return;
-            string header = command.ArgByIndex(1).Trim();
-
-            if (header != "") backupUploadHeaderKey = header;
-        }
-
-        [ConsoleCommand("get5_remote_backup_header_value", "If defined, the value of the custom header added to the backup HTTP request.")]
-        [ConsoleCommand("matchzy_remote_backup_header_value", "If defined, the value of the custom header added to the backup HTTP request.")]
-        [CommandHelper(minArgs: 1, usage: "<remote_backup_header_value>")]
-        public void BackupUploadHeaderValueCommand(CCSPlayerController? player, CommandInfo command)
-        {
-            if (player != null) return;
-            string headerValue = command.ArgByIndex(1).Trim();
-
-            if (headerValue != "") backupUploadHeaderValue = headerValue;
         }
 
     }

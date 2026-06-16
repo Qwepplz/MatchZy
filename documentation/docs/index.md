@@ -20,9 +20,7 @@ MatchZy can solve a lot of match management requirements. It provides basic comm
 * Automatically starts demo recording and stop recording when match is ended (Make sure you have tv_enable 1)
 * Automatically uploads demo on map end on the given URL.
 * Players whitelisting (Thanks to [DEAFPS](https://github.com/DEAFPS)!)
-* Coaching system
 * Damage report after every round
-* Support for round restore (Currently using the vanilla valve's backup system)
 * Ability to create admin and allowing them access to admin commands
 * Database Stats and CSV Stats! MatchZy stores data and stats of all the matches in a local SQLite database (MySQL Database is also supported!) and also creates a CSV file for detailed stats of every player in that match!
 * Provides easy configuration

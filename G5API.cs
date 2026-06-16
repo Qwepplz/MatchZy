@@ -74,7 +74,6 @@ namespace MatchZy
         WaitingForKnifeDecision = 5,
         GoingLive = 6,
         Live = 7,
-        PendingRestore = 8,
         PostGame = 9
     }
 
@@ -215,10 +214,6 @@ namespace MatchZy
             {
                 state = Get5GameState.Live;
             }
-            else if (isRoundRestoring)
-            {
-                state = Get5GameState.PendingRestore;
-            }
             else if (matchStarted)
             {
                 state = Get5GameState.Live;
@@ -251,8 +246,6 @@ namespace MatchZy
                     return "going_live";
                 case Get5GameState.Live:
                     return "live";
-                case Get5GameState.PendingRestore:
-                    return "pending_restore";
                 case Get5GameState.PostGame:
                     return "post_game";
                 default:

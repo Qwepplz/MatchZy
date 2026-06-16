@@ -22,20 +22,6 @@
     "matchzy.pause.matchended": "You cannot use this command after the game has ended.",
     "matchzy.pause.tacticaltimeout": "You cannot use this command when tactical timeout is active.",
   
-    "matchzy.restore.teamwantstorestore": "{green}{0}{default} souhaite restaurer le jeu au début du round actuel. {green}{1}{default}, veuillez écrire !stop pour confirmer.",
-    "matchzy.restore.loadedsuccessfully": "Backup file loaded successfully: {0}",
-    "matchzy.restore.restoredsuccessfully": "Fichier de sauvegarde restauré avec succès: {0}",
-    "matchzy.restore.stopcommandrequiresnodamage": "A request to restart the round cannot be given once a player has damaged any opposing player.",
-
-    "matchzy.backup.stopduringhalftime": "You cannot use this command during halftime.",
-    "matchzy.backup.stopmatchended": "You cannot use this command after the game has ended.",
-    "matchzy.backup.stoptacticaltimeout": "You cannot use this command when tactical timeout is active.",
-    "matchzy.backup.restoreinvalidvalue": "Invalid value for restore command. Please specify a valid non-negative number. Usage: !restore <round>",
-    "matchzy.backup.restoreduringhalftime": "You cannot load a backup during halftime.",
-    "matchzy.backup.restorematchended": "You cannot use this command after the game has ended.",
-    "matchzy.backup.restoretacticaltimeout": "You cannot use this command when tactical timeout is active.",
-    "matchzy.backup.restoredoesntexist": "Backup file {0} does not exist, please make sure you are restoring a valid backup.",
-  
     "matchzy.cvars.invalidvalue": "Invalid value for matchzy_chat_messages_timer_delay. Please specify a valid non-negative number.",
   
     "matchzy.cc.enabled": "{green}Enabled{default}",

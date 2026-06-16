@@ -22,20 +22,6 @@
   "matchzy.pause.matchended": "Oʻyin tugagandan soʻng siz ushbu buyruqdan foydalana olmaysiz.",
   "matchzy.pause.tacticaltimeout": "Taktik taym-out faol boʻlganda siz ushbu buyruqdan foydalana olmaysiz.",
                                                           
-  "matchzy.restore.teamwantstorestore": "{green}{0}{default} oʻyinni joriy raundning boshiga tiklamoqchi. {green}{1}{default}, tasdiqlash uchun !stop yozing.",
-  "matchzy.restore.loadedsuccessfully": "Zaxira fayli muvaffaqiyatli yuklandi: {0}",
-  "matchzy.restore.restoredsuccessfully": "Zaxira fayli muvaffaqiyatli tiklandi: {0}",
-  "matchzy.restore.stopcommandrequiresnodamage": "Agar oʻyinchi raqib oʻyinchisiga zarar yetkazgan boʻlsa, raundni qayta boshlash soʻrovini berish mumkin emas.",
-
-  "matchzy.backup.stopduringhalftime": "Tanaffus paytida ushbu buyruqdan foydalana olmaysiz.",
-  "matchzy.backup.stopmatchended": "Oʻyin tugagandan soʻng siz ushbu buyruqdan foydalana olmaysiz.",
-  "matchzy.backup.stoptacticaltimeout": "Taktik taym-out faol boʻlganda siz ushbu buyruqdan foydalana olmaysiz.",
-  "matchzy.backup.restoreinvalidvalue": "!restore buyrugʻi uchun notoʻgʻri qiymat. Iltimos, manfiy boʻlmagan toʻgʻri raqamni kiriting. Foydalanish: !restore <raund>",
-  "matchzy.backup.restoreduringhalftime": "Tanaffus paytida siz zaxira nusxasini yuklay olmaysiz.",
-  "matchzy.backup.restorematchended": "Oʻyin tugagandan soʻng siz ushbu buyruqdan foydalana olmaysiz.",
-  "matchzy.backup.restoretacticaltimeout": "Taktik taym-out faol boʻlganda siz ushbu buyruqdan foydalana olmaysiz.",
-  "matchzy.backup.restoredoesntexist": "Zaxira fayli {0} mavjud emas, yaroqli zaxira nusxasini tiklaganingizga ishonch hosil qiling.",
-
   "matchzy.cvars.invalidvalue": "matchzy_chat_messages_timer_delay uchun yaroqsiz qiymat. Iltimos, manfiy boʻlmagan toʻgʻri raqamni kiriting.",
 
   "matchzy.cc.enabled": "{green}Yoqilgan{default}",

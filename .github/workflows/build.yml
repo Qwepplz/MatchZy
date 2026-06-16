@@ -86,8 +86,6 @@ jobs:
           name: MatchZy ${{ env.MATCHZY_VERSION }}
           tag_name: ${{ env.MATCHZY_VERSION }}
           body: |
-            Please see the [`CHANGELOG.md`](https://github.com/shobhit-pathak/MatchZy/blob/main/CHANGELOG.md) for details on changes.
-
             Installation:
             There are 3 files attached here:
             One is the MatchZy-${{ env.MATCHZY_VERSION }}.zip which only contains the MatchZy plugin files. Extract its contents in csgo/ directory of the server. (Prerequisite: Metamod and CounterStrikeSharp should be already installed on the server)

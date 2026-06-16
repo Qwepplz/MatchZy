@@ -22,20 +22,6 @@
   "matchzy.pause.matchended": "Você não pode usar este comando depois que o jogo terminou.",
   "matchzy.pause.tacticaltimeout": "Você não pode usar este comando quando o tempo técnico está ativo.",
 
-  "matchzy.restore.teamwantstorestore": "{green}{0}{default} quer restaurar o jogo para o início do round atual. {green}{1}{default}, por favor, escreva {green}.stop{default} para confirmar.",
-  "matchzy.restore.loadedsuccessfully": "Backup file loaded successfully: {0}",
-  "matchzy.restore.restoredsuccessfully": "Arquivo de backup restaurado com sucesso: {0}",
-  "matchzy.restore.stopcommandrequiresnodamage": "A request to restart the round cannot be given once a player has damaged any opposing player.",
-
-  "matchzy.backup.stopduringhalftime": "Você não pode usar este comando durante o intervalo.",
-  "matchzy.backup.stopmatchended": "Você não pode usar este comando depois que o jogo terminou.",
-  "matchzy.backup.stoptacticaltimeout": "Você não pode usar este comando quando o tempo técnico está ativo.",
-  "matchzy.backup.restoreinvalidvalue": "Valor inválido para o comando de restauração. Por favor, especifique um número válido não negativo. Use: {green}!restore <round>{default}",
-  "matchzy.backup.restoreduringhalftime": "Você não pode carregar um backup durante o intervalo.",
-  "matchzy.backup.restorematchended": "Você não pode usar este comando depois que o jogo terminou.",
-  "matchzy.backup.restoretacticaltimeout": "Você não pode usar este comando quando o tempo técnico está ativo.",
-  "matchzy.backup.restoredoesntexist": "O arquivo de backup {0} não existe, por favor, certifique-se de estar restaurando um backup válido.",
-
   "matchzy.cvars.invalidvalue": "Valor inválido para {darkred}matchzy_chat_messages_timer_delay{default}. Por favor, especifique um número válido não negativo.",
 
   "matchzy.cc.enabled": "{green}Habilitado{default}",

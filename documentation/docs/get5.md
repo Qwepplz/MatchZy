@@ -150,5 +150,3 @@ docker-compose -f /path/to/your/docker-compose-file.yml up -d
 ## Current Limitations with Get5 Integration
 
 1. Stats like KAST, Teammates Flashed, Flashbang Assists, Knife Kills, Bomb plants and defuses are missing and will be shown as 0
-2. Coaches cannot be added from the panel (player can type `.coach <side>` to start coaching)
-3. Backups cannot be listed and restored from the panel (ingame commands for restoring like `.stop` and `.restore <roundnumber>` will work as expected)

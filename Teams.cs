@@ -25,50 +25,12 @@ namespace MatchZy
         [JsonPropertyName("teamplayers")]
         public JToken? teamPlayers;
 
-        [JsonIgnore, Newtonsoft.Json.JsonIgnore]
-        public HashSet<CCSPlayerController> coach = [];
-
         [JsonPropertyName("seriesscore")]
         public int seriesScore = 0;
     }
 
     public partial class MatchZy
     {
-        [ConsoleCommand("css_coach", "Sets coach for the requested team")]
-        public void OnCoachCommand(CCSPlayerController? player, CommandInfo command) 
-        {
-            HandleCoachCommand(player, command.ArgString);
-        }
-
-        [ConsoleCommand("css_uncoach", "Sets coach for the requested team")]
-        public void OnUnCoachCommand(CCSPlayerController? player, CommandInfo? command)
-        {
-            if (player == null || !player.PlayerPawn.IsValid) return;
-            if (isPractice) {
-                ReplyToUserCommand(player, "Uncoach command can only be used in match mode!");
-                return;
-            }
-
-            if (matchzyTeam1.coach.Contains(player)) {
-                player.Clan = "";
-                matchzyTeam1.coach.Remove(player);
-                SetPlayerVisible(player);
-            }
-            else if (matchzyTeam2.coach.Contains(player)) {
-                player.Clan = "";
-                matchzyTeam2.coach.Remove(player);
-                SetPlayerVisible(player);
-            }
-            else {
-                ReplyToUserCommand(player, "You are not coaching any team!");
-                return;
-            }
-
-            if (player.InGameMoneyServices != null) player.InGameMoneyServices.Account = 0;
-
-            ReplyToUserCommand(player, "You are now not coaching any team!");
-        }
-
         [ConsoleCommand("matchzy_addplayer", "Adds player to the provided team")]
         [ConsoleCommand("get5_addplayer", "Adds player to the provided team")]
         public void OnAddPlayerCommand(CCSPlayerController? player, CommandInfo? command)
